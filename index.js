@@ -10,7 +10,7 @@ const notificationRoutes = require('./src/routes/notifications');
 
 //DB Setup
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/checkm8', { useNewUrlParser: true });
+mongoose.connect('mongodb://brett:georgelynch89@ds233212.mlab.com:33212/mixdo', { useNewUrlParser: true });
 
 //App Setup
 const app = express();
