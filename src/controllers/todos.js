@@ -78,7 +78,7 @@ exports.likeTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_LIKED,
-      message: `${user.firstName} ${user.lastName} liked one of your todos: \"${likedTodo.description}\"`,
+      message: `${user.firstName} ${user.lastName} liked your todo: \"${likedTodo.description}\"`,
       from: user._id,
       for: likedTodo.user
     });
@@ -112,7 +112,7 @@ exports.addUserTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_ADDED,
-      message: `${user.firstName} ${user.lastName} added on of your todos: \"${addedTodo.description}\"`,
+      message: `${user.firstName} ${user.lastName} added your todo: \"${addedTodo.description}\"`,
       from: user._id,
       for: addedTodo.user
     });
