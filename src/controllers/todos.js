@@ -215,7 +215,7 @@ exports.infinityDiscover = async (req, res) => {
   }
 };
 
-// Get one person's todos /////////////////////////////////////////
+// Get my todos /////////////////////////////////////////
 
 exports.getMyTodos = async (req, res) => {
   try {
@@ -249,6 +249,42 @@ exports.getMyTodos = async (req, res) => {
     authService.handleError(e, res);
   }
 };
+
+// Get my todo history /////////////////////////////////
+
+exports.getMyTodoHistory = async (req, res) => {
+  try {
+    const user = authService.verifyToken(req);
+    const todos = await Todo.find({ user: user._id })
+      .where('finished').equals(true)
+      .sort({ date: 'desc' })
+      .lean()
+      .exec(); 
+
+    // const preppedTodos = todos.map(todo => {
+    //   return {
+    //     _id: todo._id,
+    //     createdDate: todo._createdDate,
+    //     date: todo.date,
+    //     user: todo.user,
+    //     description: todo.description,
+    //     metaData: todo.metaData,
+    //     finished: todo.finished,
+    //     likes: todo.likes,
+    //     comments: todo.comments,
+    //     added: todo.added,
+    //     list: true
+    //   };
+    // });  
+
+    res.status(200).json(todos);  
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+};
+
 
 // Delete Item  ///////////////////////////////////////////////////
 
