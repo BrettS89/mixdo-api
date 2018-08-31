@@ -138,6 +138,14 @@ exports.unfollowUser = async (req, res) => {
     const updatedUser = foundUser.following.filter(user => user._id.toString() !== req.body.id);
     foundUser.following = updatedUser;
     await foundUser.save();
+
+    let unfollowedUser = await User.findById(req.body.id);
+    unfollowedUser.followers = unfollowedUser.followers.filter(id => {
+      return id.toString() !== user._id;
+    });
+
+    await unfollowedUser.save()
+
     res.status(200).json({ success: true });
   }
 
