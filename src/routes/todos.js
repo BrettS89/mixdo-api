@@ -20,7 +20,7 @@ router.post('/infinity', todos.infinity);
 
 router.get('/user', todos.getMyTodos);
 
-router.get('/userhistory');
+router.get('/userhistory', todos.getMyTodoHistory);
 
 router.get('/discover', todos.discover);
 
