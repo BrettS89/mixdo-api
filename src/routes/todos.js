@@ -20,6 +20,8 @@ router.post('/infinity', todos.infinity);
 
 router.get('/user', todos.getMyTodos);
 
+router.get('/userhistory');
+
 router.get('/discover', todos.discover);
 
 router.post('/infinitidiscover', todos.infinityDiscover);
