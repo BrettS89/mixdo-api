@@ -19,6 +19,7 @@ exports.addTodo = async (req, res) => {
     createdDate: new Date(Date.now()),
     description: req.body.description,
     metaData: req.body.metaData,
+    toSearch: `${req.body.description} ${req.body.metaData}`,
     date: Number(Date.now()),
     user: user._id
   });
@@ -305,7 +306,7 @@ exports.deleteTodo = async (req, res) => {
 exports.search = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    const todos = await Todo.find({ metaData : { '$regex' : req.params.data, '$options' : 'i' } })
+    const todos = await Todo.find({ toSearch : { '$regex' : req.params.data, '$options' : 'i' } })
     .sort({ date: 'desc' })
     .limit(20)
     .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
