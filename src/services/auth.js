@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 exports.verifyToken = (req) => {
   const token = req.header('authorization');
-
   if(!token) {
     throw { error: 'Unauthorized', status: 401 }; 
   }
@@ -16,6 +15,7 @@ exports.verifyToken = (req) => {
 }
 
 exports.handleError = (e, res) => {
+  console.log(e);
   if(!e.status) {
     return res.status(500).json(e);
   }

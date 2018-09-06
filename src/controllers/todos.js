@@ -102,6 +102,7 @@ exports.addUserTodo = async (req, res) => {
     const newTodo = new Todo({
       description: req.body.description,
       metaData: req.body.metaData,
+      createdDate: new Date(Date.now()),
       date: Date.now(),
       user: user._id
     });
@@ -180,13 +181,15 @@ exports.infinity = async (req, res) => {
 exports.discover = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
+    const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .sort({ date: 'desc' })
       .limit(20)
       .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .lean()
       .exec();
     
-    const preppedTodos = todoService.getPreppedTodos(user._id, todos);
+    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id);
     res.status(200).json(preppedTodos);  
   }
 
@@ -200,14 +203,16 @@ exports.discover = async (req, res) => {
 exports.infinityDiscover = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
+    const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .where('date').lt(req.body.date)
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .lean()
       .exec();
 
-    const preppedTodos = todoService.getPreppedTodos(user._id, todos);
+    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id);
     res.status(200).json(preppedTodos);  
   }
 
@@ -290,6 +295,7 @@ exports.getMyTodoHistory = async (req, res) => {
 // Delete Item  ///////////////////////////////////////////////////
 
 exports.deleteTodo = async (req, res) => {
+  console.log(req.body);
   try {
     authService.verifyToken(req);
     await Todo.findByIdAndDelete(req.body.id);

@@ -12,7 +12,7 @@ router.post('/addusertodo', todos.addUserTodo);
 
 router.post('/finish', todos.finishTodo);
 
-router.delete('/delete', todos.deleteTodo);
+router.post('/delete', todos.deleteTodo);
 
 router.get('/get', todos.getTodos);
 
