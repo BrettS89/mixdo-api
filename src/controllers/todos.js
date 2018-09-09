@@ -189,7 +189,7 @@ exports.discover = async (req, res) => {
       .lean()
       .exec();
     
-    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id);
+    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
     res.status(200).json(preppedTodos);  
   }
 

@@ -19,9 +19,10 @@ exports.signUp = async (req, res) => {
     const newUser = new User({
       firstName,
       lastName,
-      fullName: `${firstName.toLowerCase()} ${lastName.toLowerCase()}`,
+      fullName: `${firstName} ${lastName}`,
       email,
       date: Date.now(),
+      createdDate: new Date(Date.now()).toString(),
       password: bcrypt.hashSync(req.body.password, 10)
     });
 
@@ -41,7 +42,7 @@ exports.signUp = async (req, res) => {
   catch(e) {
     res.status(500).json({ error: 'Authentication Error' });
   }
-}
+};
 
 
 exports.login = async (req, res) => {
@@ -71,4 +72,46 @@ exports.login = async (req, res) => {
 	catch(e) {
     res.status(500).json({ error: 'An error occured' });
   }
-}
+};
+
+//Auth With Facebook
+exports.facebookAuth = async (req, res) => {
+  console.log('in');
+  try {
+    const { email, id, name, picture } = req.body;
+
+    const foundUser = await User.findOne({ email });
+
+    if(foundUser) {
+      const user = {
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        email: foundUser.email,
+        _id: foundUser._id
+      };
+
+      const token = jwt.sign({user: user}, jwtSecret);
+		  return res.status(200).json({ token, status: 'login' });
+    }
+
+    const newUser = new User({
+      firstName: name.split(' ')[0],
+      lastName: name.split(' ')[1],
+      fullName: name,
+      email,
+      createdDate: new Date(Date.now()).toString(),
+      date: Date.now(),
+      password: bcrypt.hashSync(id),
+      photo: picture.data.url,
+    });
+
+    let savedUser = await newUser.save();
+
+    const token = jwt.sign({ user: savedUser }, jwtSecret);
+    res.status(200).json({ token, status: 'signup' });
+  }
+
+  catch(e) {
+    res.status(500).json('An error occured');
+  }
+};  

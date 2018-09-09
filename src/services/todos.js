@@ -1,4 +1,4 @@
-exports.getPreppedTodos = (userId, todos, following, myId) => {
+exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
   const preppedTodos = todos.map(todo => {
     for(let i = 0; i < todo.likes.length; i++) {
       if(todo.likes[i].toString() === userId.toString()) {
@@ -44,30 +44,19 @@ exports.getPreppedTodos = (userId, todos, following, myId) => {
     return todo;
   });
 
-  if(following) {
+  if(discover) {
     const todosWithFollowing = todosWithAdds.map(todo => {
+      following.push(myId);
       for(let user of following) {
-        if(user.toString() === todo.user._id.toString() || todo.user._id.toString() === myId.toString()) {
+        if(user.toString() === todo.user._id.toString()) {
           return {
-            _id: todo._id,
-            date: todo.date,
-            createdDate: todo.createdDate,
-            user: todo.user,
-            description: todo.description,
-            metaData: todo.metaData,
-            finished: todo.finished,
-            likes: todo.likes,
-            liked: todo.liked,
-            added: todo.added,
-            didAdd: todo.didAdd,
-            comments: todo.comments,
+            ...todo,
             following: true
           }
         }
-        return todo;
       }
+      return todo;
     });
-    console.log(todosWithFollowing);
     return todosWithFollowing;
   }
   

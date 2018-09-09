@@ -6,4 +6,6 @@ router.post('/signup', auth.signUp);
 
 router.post('/login', auth.login);
 
+router.post('/facebook', auth.facebookAuth);
+
 module.exports = router;

@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/auth');
 const todoRoutes = require('./src/routes/todos');
 const userRoutes = require('./src/routes/users');
 const notificationRoutes = require('./src/routes/notifications');
+const cors = require('cors');
 
 //DB Setup
 mongoose.Promise = global.Promise;
@@ -17,6 +18,7 @@ const app = express();
 app.use (morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(cors());
 app.use('/notifications', notificationRoutes);
 app.use('/users', userRoutes)
 app.use('/todos', todoRoutes);
