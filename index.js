@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/auth');
 const todoRoutes = require('./src/routes/todos');
 const userRoutes = require('./src/routes/users');
 const notificationRoutes = require('./src/routes/notifications');
+const uploadRoutes = require('./src/routes/upload');
 const cors = require('cors');
 
 //DB Setup
@@ -19,6 +20,7 @@ app.use (morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors());
+app.use('/upload', uploadRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/users', userRoutes)
 app.use('/todos', todoRoutes);

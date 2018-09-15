@@ -4,6 +4,8 @@ const users = require('../controllers/users');
 
 router.get('/find', users.find);
 
+router.get('/find/:date', users.findInfinite);
+
 router.get('/getFollowers/:type', users.getFollowers);
 
 router.post('/followUser', users.followUser);

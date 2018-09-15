@@ -6,6 +6,7 @@ const todoSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: { type: String, required: true },
   metaData: { type: String },
+  image: { type: String },
   toSearch: { type: String },
   finished: { type: Boolean, default: false },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

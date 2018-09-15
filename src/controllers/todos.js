@@ -52,8 +52,8 @@ exports.addTodo = async (req, res) => {
 
 exports.finishTodo = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
-    await Todo.findByIdAndUpdate(req.body.id, { finished: true, date: Date.now(), createdDate: new Date() });
+    await authService.verifyToken(req);
+    await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date() });
     res.status(200).json({ finished: true });
   }
 

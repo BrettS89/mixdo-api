@@ -10,16 +10,18 @@ const FOLLOWED = require('../config/index').FOLLOWED;
 exports.find = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    const users = await User.find({}, ['_id', 'firstName', 'lastName', 'photo'])
-      .where('_id').ne(user._id)
-      // .sort({ date: 'desc' })
-      .limit(30)
-      .exec();
 
     const following = await User.findById(user._id, 'following')
       .populate('following', ['_id'])
       .exec();
-    
+
+    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'photo', 'date'])
+      .where('_id').ne(user._id)
+      .sort({ date: 'desc' })
+      .limit(20)
+      .lean()
+      .exec();
+
     res.status(200).json({ users, following });
   }
 
@@ -27,6 +29,40 @@ exports.find = async (req, res) => {
     res.status(200).json({ users: 'no users' });
   }
 };
+
+//Find Friends infinite scroll //////////////////////////////////////
+
+exports.findInfinite = async (req, res) => {
+  try {
+    const user = authService.verifyToken(req);
+
+    const following = await User.findById(user._id, 'following')
+      .populate('following', ['_id'])
+      .lean()
+      .exec();
+
+    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'photo', 'date'])
+      .where('date').lt(Number(req.params.date))
+      .sort({ date: 'desc' })
+      .limit(20)
+      .lean()
+      .exec();
+
+    const filteredUsers = users.filter(oneUser => {
+      return oneUser._id.toString() !== user._id;
+    });
+
+    console.log(filteredUsers);
+
+    res.status(200).json(filteredUsers);
+  }
+
+  catch(e) {
+    console.log(e);
+    res.status(200).json({ users: 'no users' });
+  }
+};
+
 
 //Get Followers /////////////////////////////////////////////////////
 
