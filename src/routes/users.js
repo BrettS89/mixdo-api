@@ -20,4 +20,6 @@ router.get('/getUserTodoHistory', users.getUserTodoHistory);
 
 router.get('/search/:name', users.searchUser);
 
+router.post('/profilephoto', users.uploadProfilePhoto);
+
 module.exports = router;

@@ -196,12 +196,27 @@ exports.unfollowUser = async (req, res) => {
 exports.myProfile = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    const myProfile = await User.findById(user._id, ['_id,', 'firstName', 'lastName', 'photo']);
+    const myProfile = await User.findById(user._id, ['_id,', 'firstName', 'lastName', 'fullName', 'photo']);
     res.status(200).json(myProfile);
   }
 
   catch(e) {
     authService.handleError(e, res);
+  }
+};
+
+//Upload Profile Photo /////////////////////////////////////////////////
+
+exports.uploadProfilePhoto = async (req, res) => {
+  try {
+    const user = authService.verifyToken(req);
+    const foundUser = await User.findById(user._id);
+    foundUser.photo = req.body.photo;
+    await foundUser.save();
+    res.status(200).json(foundUser);
+  }
+  catch(e) {
+    authService.handleError(e, res); 
   }
 };
 
