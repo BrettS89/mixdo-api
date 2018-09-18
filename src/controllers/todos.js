@@ -49,7 +49,7 @@ exports.addTodo = async (req, res) => {
     res.status(200).json(preppedTodo);
 
     mixpanel.track('added todo', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -67,7 +67,7 @@ exports.finishTodo = async (req, res) => {
     res.status(200).json({ finished: true });
 
     mixpanel.track('finished todo', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -103,7 +103,7 @@ exports.likeTodo = async (req, res) => {
     res.status(200).json({ liked: req.body.todo });
 
     mixpanel.track('todo liked', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -189,7 +189,7 @@ exports.infinity = async (req, res) => {
     res.status(200).json(preppedTodos);
 
     mixpanel.track('feed deep', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -238,7 +238,7 @@ exports.infinityDiscover = async (req, res) => {
     res.status(200).json(preppedTodos);
 
     mixpanel.track('discover deep', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -346,8 +346,8 @@ exports.search = async (req, res) => {
     .exec();
     res.status(200).json(todos);
 
-    mixpanel.track('search', {
-      id: user._id,
+    mixpanel.track('todo search', {
+      distinct_id: user._id,
     });
   }
 

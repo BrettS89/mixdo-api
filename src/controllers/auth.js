@@ -45,7 +45,7 @@ exports.signUp = async (req, res) => {
     res.status(200).json({ token });
 
     mixpanel.track('signup', {
-      id: savedUser._id,
+      distinct_id: savedUser._id,
     });
   }
 
@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
     res.status(200).json({ token });
     
     mixpanel.track('login', {
-      id: user._id,
+      distinct_id: user._id,
     });
   }
 
@@ -105,7 +105,10 @@ exports.facebookAuth = async (req, res) => {
       };
 
       const token = jwt.sign({user: user}, jwtSecret);
-		  return res.status(200).json({ token, status: 'login' });
+      res.status(200).json({ token, status: 'login' });
+      return mixpanel.track('login', {
+        distinct_id: user._id,
+      });
     }
 
     const newUser = new User({
@@ -123,6 +126,9 @@ exports.facebookAuth = async (req, res) => {
 
     const token = jwt.sign({ user: savedUser }, jwtSecret);
     res.status(200).json({ token, status: 'signup' });
+    mixpanel.track('signup', {
+      distinct_id: savedUser._id,
+    });
   }
 
   catch(e) {
