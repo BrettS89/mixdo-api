@@ -6,4 +6,5 @@ module.exports = {
   accessKeyId: 'AKIAIXWKYTXTF6ADH7PA',
   secretAccessKey: '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',
   bucket: 'mixdodev',
+  mixpanelToken: '383e247e37693254fa83433db64dcce7',
 };

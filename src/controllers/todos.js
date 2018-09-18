@@ -1,9 +1,15 @@
+const Mixpanel = require('mixpanel');
+const key = require('../config').mixpanelToken;
 const authService = require('../services/auth');
 const todoService = require('../services/todos');
 const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
 const notificationTypes = require('../config/index');
+
+const mixpanel = Mixpanel.init(key, {
+  protocol: 'https'
+});
 
 // Add a todo /////////////////////////////////////////////////
 
@@ -41,6 +47,10 @@ exports.addTodo = async (req, res) => {
     };
 
     res.status(200).json(preppedTodo);
+
+    mixpanel.track('added todo', {
+      id: user._id,
+    });
   }
 
   catch(e) {
@@ -52,9 +62,13 @@ exports.addTodo = async (req, res) => {
 
 exports.finishTodo = async (req, res) => {
   try {
-    await authService.verifyToken(req);
+    const user = await authService.verifyToken(req);
     await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date() });
     res.status(200).json({ finished: true });
+
+    mixpanel.track('finished todo', {
+      id: user._id,
+    });
   }
 
   catch(e) {
@@ -87,6 +101,10 @@ exports.likeTodo = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ liked: req.body.todo });
+
+    mixpanel.track('todo liked', {
+      id: user._id,
+    });
   }
 
   catch(e) {
@@ -168,7 +186,11 @@ exports.infinity = async (req, res) => {
       .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
       .exec();
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
-    res.status(200).json(preppedTodos);  
+    res.status(200).json(preppedTodos);
+
+    mixpanel.track('feed deep', {
+      id: user._id,
+    });
   }
 
   catch(e) {
@@ -212,8 +234,12 @@ exports.infinityDiscover = async (req, res) => {
       .lean()
       .exec();
 
-    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id);
-    res.status(200).json(preppedTodos);  
+    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
+    res.status(200).json(preppedTodos);
+
+    mixpanel.track('discover deep', {
+      id: user._id,
+    });
   }
 
   catch(e) {
@@ -319,6 +345,10 @@ exports.search = async (req, res) => {
     .lean()
     .exec();
     res.status(200).json(todos);
+
+    mixpanel.track('search', {
+      id: user._id,
+    });
   }
 
   catch(e) {

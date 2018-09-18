@@ -1,8 +1,14 @@
+const Mixpanel = require('mixpanel');
+const key = require('../config').mixpanelToken;
 const authService = require('../services/auth');
 const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
 const FOLLOWED = require('../config/index').FOLLOWED;
+
+const mixpanel = Mixpanel.init(key, {
+  protocol: 'https'
+});
 
 
 //Find Friends ////////////////////////////////////////////////////

@@ -1,7 +1,13 @@
+const Mixpanel = require('mixpanel');
+const key = require('../config').mixpanelToken;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const jwtSecret = require('../config').jwtSecret;
+
+const mixpanel = Mixpanel.init(key, {
+  protocol: 'https'
+});
 
 exports.signUp = async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -37,6 +43,10 @@ exports.signUp = async (req, res) => {
 
     const token = jwt.sign({ user: savedUser }, jwtSecret);
     res.status(200).json({ token });
+
+    mixpanel.track('signup', {
+      id: savedUser._id,
+    });
   }
 
   catch(e) {
@@ -66,7 +76,11 @@ exports.login = async (req, res) => {
     }
 
 		const token = jwt.sign({user: user}, jwtSecret);
-		res.status(200).json({ token });
+    res.status(200).json({ token });
+    
+    mixpanel.track('login', {
+      id: user._id,
+    });
   }
 
 	catch(e) {
