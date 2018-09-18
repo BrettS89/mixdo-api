@@ -9,4 +9,4 @@ exports.track = (event, id) => {
   mixpanel.track(event, {
     distinct_id: id,
   });
-}
+};

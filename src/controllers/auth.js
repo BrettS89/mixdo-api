@@ -1,13 +1,9 @@
-const Mixpanel = require('mixpanel');
-const key = require('../config').mixpanelToken;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const jwtSecret = require('../config').jwtSecret;
 
-const mixpanel = Mixpanel.init(key, {
-  protocol: 'https'
-});
+const mixpanel = require('../services/mixpanel');
 
 exports.signUp = async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -44,9 +40,7 @@ exports.signUp = async (req, res) => {
     const token = jwt.sign({ user: savedUser }, jwtSecret);
     res.status(200).json({ token });
 
-    mixpanel.track('signup', {
-      distinct_id: savedUser._id,
-    });
+    mixpanel.track('signup', savedUser._id);
   }
 
   catch(e) {
@@ -78,9 +72,7 @@ exports.login = async (req, res) => {
 		const token = jwt.sign({user: user}, jwtSecret);
     res.status(200).json({ token });
     
-    mixpanel.track('login', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('login', user._id);
   }
 
 	catch(e) {
@@ -106,9 +98,8 @@ exports.facebookAuth = async (req, res) => {
 
       const token = jwt.sign({user: user}, jwtSecret);
       res.status(200).json({ token, status: 'login' });
-      return mixpanel.track('login', {
-        distinct_id: user._id,
-      });
+      
+      mixpanel.track('facebook login', user._id);
     }
 
     const newUser = new User({
@@ -126,9 +117,8 @@ exports.facebookAuth = async (req, res) => {
 
     const token = jwt.sign({ user: savedUser }, jwtSecret);
     res.status(200).json({ token, status: 'signup' });
-    mixpanel.track('signup', {
-      distinct_id: savedUser._id,
-    });
+
+    mixpanel.track('facebook signup', savedUser._id);
   }
 
   catch(e) {

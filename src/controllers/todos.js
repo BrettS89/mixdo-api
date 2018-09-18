@@ -61,9 +61,7 @@ exports.finishTodo = async (req, res) => {
     await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date() });
     res.status(200).json({ finished: true });
 
-    mixpanel.track('finished todo', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('finished todo', user._id);
   }
 
   catch(e) {
@@ -97,9 +95,7 @@ exports.likeTodo = async (req, res) => {
 
     res.status(200).json({ liked: req.body.todo });
 
-    mixpanel.track('todo liked', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('todo liked', user._id);
   }
 
   catch(e) {
@@ -183,9 +179,7 @@ exports.infinity = async (req, res) => {
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
     res.status(200).json(preppedTodos);
 
-    mixpanel.track('feed deep', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('feed deep', user._id);
   }
 
   catch(e) {
@@ -232,9 +226,7 @@ exports.infinityDiscover = async (req, res) => {
     const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
     res.status(200).json(preppedTodos);
 
-    mixpanel.track('discover deep', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('discover deep', user._id);
   }
 
   catch(e) {
@@ -341,9 +333,7 @@ exports.search = async (req, res) => {
     .exec();
     res.status(200).json(todos);
 
-    mixpanel.track('todo search', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('todo search', user._id);
   }
 
   catch(e) {
