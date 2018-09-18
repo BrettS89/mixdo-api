@@ -1,5 +1,3 @@
-const Mixpanel = require('mixpanel');
-const key = require('../config').mixpanelToken;
 const authService = require('../services/auth');
 const todoService = require('../services/todos');
 const Todo = require('../models/todo');
@@ -7,9 +5,8 @@ const User = require('../models/user');
 const Notification = require('../models/notification');
 const notificationTypes = require('../config/index');
 
-const mixpanel = Mixpanel.init(key, {
-  protocol: 'https'
-});
+const mixpanel = require('../services/mixpanel');
+
 
 // Add a todo /////////////////////////////////////////////////
 
@@ -48,9 +45,7 @@ exports.addTodo = async (req, res) => {
 
     res.status(200).json(preppedTodo);
 
-    mixpanel.track('added todo', {
-      distinct_id: user._id,
-    });
+    mixpanel.track('added todo', user._id);
   }
 
   catch(e) {
