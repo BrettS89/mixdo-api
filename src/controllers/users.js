@@ -16,6 +16,7 @@ exports.savePushToken = async (req, res) => {
     const user = authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
+    console.log(foundUser);
     await foundUser.save();
     res.status(200).json({ succes: true });
   }
