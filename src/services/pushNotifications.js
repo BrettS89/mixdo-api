@@ -1,5 +1,5 @@
-const Expo = require('expo-server-sdk');
-let expo = new Expo();
+const { Expo }= require('expo-server-sdk');
+const expo = new Expo();
 
 exports.send = (pushToken, message) => {
 
