@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   photo: { type: String },
   devices: [],
+  pushToken: { type: String },
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });

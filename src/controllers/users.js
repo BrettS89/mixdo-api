@@ -10,6 +10,21 @@ const mixpanel = Mixpanel.init(key, {
   protocol: 'https'
 });
 
+//Save pushToken
+exports.savePushToken = async (req, res) => {
+  try {
+    const user = authService.verifyToken(req);
+    let foundUser = await User.findById(user._id);
+    foundUser.pushToken = req.body.pushToken;
+    await foundUser.save();
+    res.status(200).json({ succes: true });
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+};
+
 
 //Find Friends ////////////////////////////////////////////////////
 
