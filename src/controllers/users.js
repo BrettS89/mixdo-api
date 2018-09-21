@@ -5,10 +5,8 @@ const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
 const FOLLOWED = require('../config/index').FOLLOWED;
+const notifications = require('../services/pushNotifications');
 
-const mixpanel = Mixpanel.init(key, {
-  protocol: 'https'
-});
 
 //Save pushToken
 exports.savePushToken = async (req, res) => {
@@ -16,7 +14,6 @@ exports.savePushToken = async (req, res) => {
     const user = authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
-    console.log(foundUser);
     await foundUser.save();
     res.status(200).json({ succes: true });
   }
@@ -180,6 +177,11 @@ exports.followUser = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ success: true });
+
+    if(followedUser.pushToken) {
+      notifications.send(followedUser, `${foundUser.firstName} ${foundUser.lastName} started following you`);
+    }
+    
   }
 
   catch(e) {
