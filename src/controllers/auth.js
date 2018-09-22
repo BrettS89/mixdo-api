@@ -33,6 +33,7 @@ exports.signUp = async (req, res) => {
     savedUser = {
       firstName: savedUser.firstName,
       lastName: savedUser.lastName,
+      fullName: user.fullName,
       email: savedUser.email,
       _id: savedUser._id
     }
@@ -65,6 +66,7 @@ exports.login = async (req, res) => {
     user = {
       firstName: user.firstName,
       lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       _id: user._id
     }
@@ -89,9 +91,11 @@ exports.facebookAuth = async (req, res) => {
     const foundUser = await User.findOne({ email });
 
     if(foundUser) {
+
       const user = {
         firstName: foundUser.firstName,
         lastName: foundUser.lastName,
+        fullName: foundUser.fullName,
         email: foundUser.email,
         _id: foundUser._id
       };
@@ -99,7 +103,7 @@ exports.facebookAuth = async (req, res) => {
       const token = jwt.sign({user: user}, jwtSecret);
       res.status(200).json({ token, status: 'login' });
       
-      mixpanel.track('facebook login', user._id);
+      return mixpanel.track('facebook login', user._id);
     }
 
     const newUser = new User({
@@ -115,7 +119,15 @@ exports.facebookAuth = async (req, res) => {
 
     let savedUser = await newUser.save();
 
-    const token = jwt.sign({ user: savedUser }, jwtSecret);
+    const user = {
+      firstName: savedUser.firstName,
+      lastName: savedUser.lastName,
+      fullName: savedUser.fullName,
+      email: savedUser.email,
+      _id: savedUser._id
+    };
+
+    const token = jwt.sign({ user }, jwtSecret);
     res.status(200).json({ token, status: 'signup' });
 
     mixpanel.track('facebook signup', savedUser._id);

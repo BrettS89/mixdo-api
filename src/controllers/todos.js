@@ -6,6 +6,7 @@ const Notification = require('../models/notification');
 const notificationTypes = require('../config/index');
 
 const mixpanel = require('../services/mixpanel');
+const notifications = require('../services/pushNotifications');
 
 
 // Add a todo /////////////////////////////////////////////////
@@ -86,7 +87,7 @@ exports.likeTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_LIKED,
-      message: `${user.firstName} ${user.lastName} liked your todo: \"${likedTodo.description}\"`,
+      message: `${user.fullName} liked your todo: \"${likedTodo.description}\"`,
       from: user._id,
       for: likedTodo.user
     });
@@ -94,6 +95,12 @@ exports.likeTodo = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ liked: req.body.todo });
+
+    const foundUser = await User.findById(likedTodo.user);
+
+    if(foundUser.pushToken) {
+      await notifications.send(foundUser.pushToken, `${user.fullName} started following you`);
+    }
 
     mixpanel.track('todo liked', user._id);
   }
@@ -123,7 +130,7 @@ exports.addUserTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_ADDED,
-      message: `${user.firstName} ${user.lastName} added your todo: \"${addedTodo.description}\"`,
+      message: `${user.fullName} added your todo: \"${addedTodo.description}\"`,
       from: user._id,
       for: addedTodo.user
     });
@@ -131,6 +138,12 @@ exports.addUserTodo = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ success: true });
+
+    const foundUser = await User.findById(likedTodo.user);
+
+    if(foundUser.pushToken) {
+      await notifications.send(foundUser.pushToken, `${user.fullName} started following you`);
+    }
   }
 
   catch(e) {

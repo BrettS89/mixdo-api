@@ -179,7 +179,8 @@ exports.followUser = async (req, res) => {
     res.status(200).json({ success: true });
 
     if(followedUser.pushToken) {
-      await notifications.send(followedUser, `${foundUser.firstName} ${foundUser.lastName} started following you`);
+      console.log('in');
+      await notifications.send(followedUser.pushToken, `${foundUser.fullName} started following you`);
     }
     
   }
