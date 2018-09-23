@@ -18,5 +18,4 @@ exports.send = async (pushToken, message) => {
   catch(e) {
     console.log(e);
   }
-  
 };
