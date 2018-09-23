@@ -4,7 +4,7 @@ const mixpanel = require('../services/mixpanel');
 const authService = require('../services/auth');
 
 router.get('/', (req, res) => {
-  res.send('Welcome to the checkm8 api');
+  res.send('Welcome to the mixdo api');
 });
 
 router.get('/connection', (req, res) => {
