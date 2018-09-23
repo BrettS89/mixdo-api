@@ -6,7 +6,7 @@ const jwtSecret = require('../config').jwtSecret;
 const mixpanel = require('../services/mixpanel');
 
 exports.signUp = async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+  const { email, password, firstName, lastName, deviceName } = req.body;
   try {
     if(!email || !password) {
       return res.status(422).send({ error: 'You must provide an email and password' });
@@ -25,7 +25,8 @@ exports.signUp = async (req, res) => {
       email,
       date: Date.now(),
       createdDate: new Date(Date.now()).toString(),
-      password: bcrypt.hashSync(req.body.password, 10)
+      password: bcrypt.hashSync(req.body.password, 10),
+      devices: [deviceName],
     });
 
     let savedUser = await newUser.save();
@@ -52,9 +53,10 @@ exports.signUp = async (req, res) => {
 
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, deviceName } = req.body;
+  console.log(deviceName);
   try {
-    let user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
 		if(!user){
 			return res.status(401).json({ message: 'Invalid login credentials' });
@@ -64,7 +66,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid login credentials' })
     }
 
-    user = {
+    const tokenUser = {
       firstName: user.firstName,
       lastName: user.lastName,
       fullName: user.fullName,
@@ -72,13 +74,21 @@ exports.login = async (req, res) => {
       _id: user._id
     }
 
-		const token = jwt.sign({user: user}, jwtSecret);
+		const token = jwt.sign({user: tokenUser}, jwtSecret);
     res.status(200).json({ token });
+    console.log(user)
+    if(user.devices.indexOf(deviceName) === -1) {
+      user.devices.push(deviceName);
+      await user.save();
+    }
+    console.log('what?');
     
     mixpanel.track('login', user._id);
+    console.log('really?');
   }
 
 	catch(e) {
+    console.log(e);
     res.status(500).json({ error: 'An error occured' });
   }
 };
@@ -87,23 +97,28 @@ exports.login = async (req, res) => {
 exports.facebookAuth = async (req, res) => {
   console.log('in');
   try {
-    const { email, id, name, picture } = req.body;
+    const { email, id, name, picture, deviceName } = req.body;
 
     const foundUser = await User.findOne({ email });
 
     if(foundUser) {
+
+      if(foundUser.devices.indexOf(deviceName) === -1) {
+        foundUser.devices.push(deviceName);
+      }
 
       const user = {
         firstName: foundUser.firstName,
         lastName: foundUser.lastName,
         fullName: foundUser.fullName,
         email: foundUser.email,
-        _id: foundUser._id
+        _id: foundUser._id,
       };
 
       const token = jwt.sign({user: user}, jwtSecret);
       res.status(200).json({ token, status: 'login' });
-      
+
+      await foundUser.save();
       return mixpanel.track('facebook login', user._id);
     }
 
@@ -116,6 +131,7 @@ exports.facebookAuth = async (req, res) => {
       date: Date.now(),
       password: bcrypt.hashSync(id),
       photo: picture.data.url,
+      devices: [deviceName],
     });
 
     let savedUser = await newUser.save();

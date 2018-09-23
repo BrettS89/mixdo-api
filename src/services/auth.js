@@ -15,7 +15,6 @@ exports.verifyToken = (req) => {
 }
 
 exports.handleError = (e, res) => {
-  console.log(e);
   if(!e.status) {
     return res.status(500).json(e);
   }
