@@ -24,8 +24,6 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
     "rimraf": "^2.6.2"
   }
 }
