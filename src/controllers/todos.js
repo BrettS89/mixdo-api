@@ -162,7 +162,7 @@ exports.getTodos = async (req, res) => {
       // .where('finished').equals(false)
       .sort({ date: 'desc' })
       .limit(20)
-      .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .lean()
       .exec(); 
 
@@ -187,7 +187,7 @@ exports.infinity = async (req, res) => {
       .where('date').lt(req.body.date)
       .sort({ date: 'desc' })
       .limit(10)
-      .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .exec();
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
     res.status(200).json(preppedTodos);
@@ -209,7 +209,7 @@ exports.discover = async (req, res) => {
     const todos = await Todo.find()
       .sort({ date: 'desc' })
       .limit(20)
-      .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .lean()
       .exec();
     
@@ -341,7 +341,7 @@ exports.search = async (req, res) => {
     const todos = await Todo.find({ toSearch : { '$regex' : req.params.data, '$options' : 'i' } })
     .sort({ date: 'desc' })
     .limit(20)
-    .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+    .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .lean()
     .exec();
     res.status(200).json(todos);

@@ -9,10 +9,11 @@ const userRoutes = require('./src/routes/users');
 const notificationRoutes = require('./src/routes/notifications');
 const uploadRoutes = require('./src/routes/upload');
 const cors = require('cors');
+const keys = require('./src/config');
 
 //DB Setup
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://brett:georgelynch89@ds233212.mlab.com:33212/mixdo', { useNewUrlParser: true });
+mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
 
 //App Setup
 const app = express();

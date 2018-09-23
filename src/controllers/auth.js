@@ -33,7 +33,7 @@ exports.signUp = async (req, res) => {
     savedUser = {
       firstName: savedUser.firstName,
       lastName: savedUser.lastName,
-      fullName: user.fullName,
+      fullName: savedUser.fullName,
       email: savedUser.email,
       _id: savedUser._id
     }
@@ -45,6 +45,7 @@ exports.signUp = async (req, res) => {
   }
 
   catch(e) {
+    console.log(e);
     res.status(500).json({ error: 'Authentication Error' });
   }
 };

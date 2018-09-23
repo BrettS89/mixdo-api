@@ -34,7 +34,7 @@ exports.find = async (req, res) => {
       .populate('following', ['_id'])
       .exec();
 
-    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'photo', 'date'])
+    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo', 'date'])
       .where('_id').ne(user._id)
       .sort({ date: 'desc' })
       .limit(20)
@@ -60,7 +60,7 @@ exports.findInfinite = async (req, res) => {
       .lean()
       .exec();
 
-    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'photo', 'date'])
+    const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo', 'date'])
       .where('date').lt(Number(req.params.date))
       .sort({ date: 'desc' })
       .limit(20)
@@ -91,7 +91,7 @@ exports.getFollowers = async (req, res) => {
     try {
       const user = authService.verifyToken(req);
       const followers = await User.findById(user._id, 'followers')
-        .populate('followers', ['_id', 'firstName', 'lastName', 'photo'])
+        .populate('followers', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
         // .limit(20)
         .lean()
         .exec();
@@ -132,7 +132,7 @@ exports.getFollowers = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
     let following = await User.findById(user._id, 'following')
-      .populate('following', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('following', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .lean()
       .exec();
       const followers1 = following.following.map(user => {
@@ -250,7 +250,7 @@ exports.uploadProfilePhoto = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    const userProfile = await User.findById(req.params.id, ['_id', 'firstName', 'lastName', 'photo']);
+    const userProfile = await User.findById(req.params.id, ['_id', 'firstName', 'lastName', 'fullName', 'photo']);
     const userTodos = await Todo.find({ user: req.params.id })
       .where('finished').equals(false)
       .exec();
@@ -268,7 +268,7 @@ exports.getProfile = async (req, res) => {
 exports.searchUser = async (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    const users = await User.find({ fullName : { '$regex' : req.params.name, '$options' : 'i' } }, ['_id', 'firstName', 'lastName', 'photo'])
+    const users = await User.find({ fullName : { '$regex' : req.params.name, '$options' : 'i' } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .limit(20)
     .exec();
     res.status(200).json(users);
