@@ -44,7 +44,7 @@ exports.addTodo = async (req, res) => {
       list: true
     };
 
-    res.status(200).json(preppedTodo);
+    res.status(200).json({ res: preppedTodo, token });
 
     mixpanel.track('added todo', user._id);
   }
@@ -60,7 +60,7 @@ exports.finishTodo = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date(Date.now()).toString() });
-    res.status(200).json({ finished: true });
+    res.status(200).json({ res: { finished: true }, token });
 
     mixpanel.track('finished todo', user._id);
   }
@@ -94,7 +94,7 @@ exports.likeTodo = async (req, res) => {
 
     await notification.save();
 
-    res.status(200).json({ liked: req.body.todo });
+    res.status(200).json({ res: { liked: req.body.todo }, token });
 
     const foundUser = await User.findById(likedTodo.user);
 
@@ -138,7 +138,7 @@ exports.addUserTodo = async (req, res) => {
 
     await notification.save();
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ res: { success: true }, token });
 
     const foundUser = await User.findById(addedTodo.user);
 
@@ -169,7 +169,7 @@ exports.getTodos = async (req, res) => {
       .exec(); 
 
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
-    res.status(200).json(preppedTodos);  
+    res.status(200).json({ res: preppedTodos, token });  
   }
 
   catch(e) {
@@ -192,7 +192,7 @@ exports.infinity = async (req, res) => {
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .exec();
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
-    res.status(200).json(preppedTodos);
+    res.status(200).json({ res: preppedTodos, token });
 
     mixpanel.track('feed deep', user._id);
   }
@@ -217,7 +217,7 @@ exports.discover = async (req, res) => {
       .exec();
     
     const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
-    res.status(200).json(preppedTodos);  
+    res.status(200).json({ res: preppedTodos, token });  
   }
 
   catch(e) {

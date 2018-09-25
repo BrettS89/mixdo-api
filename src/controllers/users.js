@@ -1,5 +1,3 @@
-const Mixpanel = require('mixpanel');
-const key = require('../config').mixpanelToken;
 const authService = require('../services/auth');
 const Todo = require('../models/todo');
 const User = require('../models/user');
@@ -15,7 +13,7 @@ exports.savePushToken = async (req, res) => {
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
     await foundUser.save();
-    res.status(200).json({ succes: true });
+    res.status(200).json({ res: { succes: true }, token });
   }
 
   catch(e) {
@@ -42,7 +40,7 @@ exports.find = async (req, res) => {
       .lean()
       .exec();
 
-    res.status(200).json({ users, following });
+    res.status(200).json({ res: { users, following }, token });
   }
 
   catch(e) {
@@ -74,7 +72,7 @@ exports.findInfinite = async (req, res) => {
 
     console.log(filteredUsers);
 
-    res.status(200).json(filteredUsers);
+    res.status(200).json({ res: filteredUsers, token });
   }
 
   catch(e) {
@@ -118,15 +116,15 @@ exports.getFollowers = async (req, res) => {
             return follower;
           });
   
-        return res.status(200).json({followers1});  
+        return res.status(200).json({ followers1, token });  
       }  
       catch(e) {
         const followers1 = followers.followers;
-        res.status(200).json({followers1});
+        return res.status(200).json({ followers1, token });
       }    
     }
     catch(e) {
-      res.status(200).json({ users: 'no users' });
+      return res.status(200).json({ users: 'no users', token });
     }
   }
 
@@ -146,11 +144,11 @@ exports.getFollowers = async (req, res) => {
           following: true
         };
       });
-      res.status(200).json({followers1});
+      res.status(200).json({ followers1, token });
   }
 
   catch(e) {
-    res.status(200).json({ users: 'no users' });
+    res.status(200).json({ users: 'no users', token });
   }
 
 };
@@ -169,7 +167,7 @@ exports.followUser = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: FOLLOWED,
-      message: `${foundUser.firstName} ${foundUser.lastName} started following you`,
+      message: `${foundUser.fullName} started following you`,
       from: foundUser._id,
       for: req.body.id
     });
@@ -178,7 +176,7 @@ exports.followUser = async (req, res) => {
     await followedUser.save();
     await notification.save();
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ res: { success: true }, token });
 
     if(followedUser.pushToken) {
       console.log('in');
@@ -209,7 +207,7 @@ exports.unfollowUser = async (req, res) => {
 
     await unfollowedUser.save()
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ res: { success: true }, token });
   }
 
   catch(e) {
@@ -224,7 +222,7 @@ exports.myProfile = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     const myProfile = await User.findById(user._id, ['_id,', 'firstName', 'lastName', 'fullName', 'photo']);
-    res.status(200).json(myProfile);
+    res.status(200).json({ res: myProfile, token });
   }
 
   catch(e) {
@@ -257,7 +255,7 @@ exports.getProfile = async (req, res) => {
       .where('finished').equals(false)
       .exec();
     
-    res.status(200).json({ user: userProfile, todos: userTodos });
+    res.status(200).json({ user: userProfile, todos: userTodos, token });
   }
 
   catch(e) {
@@ -273,14 +271,13 @@ exports.searchUser = async (req, res) => {
     const users = await User.find({ fullName : { '$regex' : req.params.name, '$options' : 'i' } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .limit(20)
     .exec();
-    res.status(200).json(users);
+    res.status(200).json({ res: users, token });
   }
 
   catch(e) {
     authService.handleError(e, res);
   }
 };
-
 
 
 
