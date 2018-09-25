@@ -1,17 +1,37 @@
 const jwt = require('jsonwebtoken');
+const keys = require('../config');
 
-exports.verifyToken = (req) => {
-  const token = req.header('authorization');
-  if(!token) {
+exports.verifyToken = async (req) => {
+  const receivedToken = req.header('authorization');
+  const deviceName = req.header('deviceName');
+  if(!receivedToken) {
     throw { error: 'Unauthorized', status: 401 }; 
   }
 
-  const decodedUser = jwt.decode(token);
+  try {
+    await jwt.verify(receivedToken, keys.jwtSecret);
+  } 
+  catch(e) {
+    const error = (e.toString().split(' ')[2]);
+
+    if(error === 'signature') {
+      throw new Error('Wrong signature');
+    }
+  }
+
+  const decodedUser = jwt.decode(receivedToken);
+
+  if(decodedUser.user.devices.indexOf(deviceName) === -1) {
+    throw { error: 'Unauthorized', status: 401 };
+  }
 
   if(decodedUser === null || !decodedUser.user.email) {
     throw { error: 'Unauthorized', status: 401 };
   }
-  return decodedUser.user;
+
+  const token = jwt.sign({ user: decodedUser.user }, keys.jwtSecret, { expiresIn: 1 });
+
+  return { user: decodedUser.user, token };
 }
 
 exports.handleError = (e, res) => {

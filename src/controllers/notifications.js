@@ -4,7 +4,7 @@ const Notification = require('../models/notification');
 
 exports.get = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     console.log(user);
     const notifications = await Notification.find({ for: user._id })
       .sort({ date: 'desc' })

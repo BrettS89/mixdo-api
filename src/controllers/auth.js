@@ -32,14 +32,13 @@ exports.signUp = async (req, res) => {
     let savedUser = await newUser.save();
 
     savedUser = {
-      firstName: savedUser.firstName,
-      lastName: savedUser.lastName,
       fullName: savedUser.fullName,
       email: savedUser.email,
-      _id: savedUser._id
+      _id: savedUser._id,
+      devices: savedUser.devices,
     }
 
-    const token = jwt.sign({ user: savedUser }, jwtSecret);
+    const token = jwt.sign({ user: savedUser }, jwtSecret, { expiresIn: 1 });
     res.status(200).json({ token });
 
     mixpanel.track('signup', savedUser._id);
@@ -67,24 +66,21 @@ exports.login = async (req, res) => {
     }
 
     const tokenUser = {
-      firstName: user.firstName,
-      lastName: user.lastName,
       fullName: user.fullName,
       email: user.email,
-      _id: user._id
-    }
+      _id: user._id,
+      devices: user.devices,
+    };
 
-		const token = jwt.sign({user: tokenUser}, jwtSecret);
+		const token = jwt.sign({ user: tokenUser }, jwtSecret, { expiresIn: 1 });
     res.status(200).json({ token });
     console.log(user)
     if(user.devices.indexOf(deviceName) === -1) {
       user.devices.push(deviceName);
       await user.save();
     }
-    console.log('what?');
     
     mixpanel.track('login', user._id);
-    console.log('really?');
   }
 
 	catch(e) {
@@ -108,14 +104,13 @@ exports.facebookAuth = async (req, res) => {
       }
 
       const user = {
-        firstName: foundUser.firstName,
-        lastName: foundUser.lastName,
         fullName: foundUser.fullName,
         email: foundUser.email,
         _id: foundUser._id,
+        devices: foundUser.devices,
       };
 
-      const token = jwt.sign({user: user}, jwtSecret);
+      const token = jwt.sign({ user }, jwtSecret, { expiresIn: 1 });
       res.status(200).json({ token, status: 'login' });
 
       await foundUser.save();
@@ -137,14 +132,13 @@ exports.facebookAuth = async (req, res) => {
     let savedUser = await newUser.save();
 
     const user = {
-      firstName: savedUser.firstName,
-      lastName: savedUser.lastName,
       fullName: savedUser.fullName,
       email: savedUser.email,
-      _id: savedUser._id
+      _id: savedUser._id,
+      devices: savedUser.devices,
     };
 
-    const token = jwt.sign({ user }, jwtSecret);
+    const token = jwt.sign({ user: savedUser }, jwtSecret, { expiresIn: 1 });
     res.status(200).json({ token, status: 'signup' });
 
     mixpanel.track('facebook signup', savedUser._id);

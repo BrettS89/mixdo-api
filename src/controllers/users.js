@@ -11,7 +11,7 @@ const notifications = require('../services/pushNotifications');
 //Save pushToken
 exports.savePushToken = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
     await foundUser.save();
@@ -28,7 +28,8 @@ exports.savePushToken = async (req, res) => {
 
 exports.find = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
+    console.log('hi', user);
 
     const following = await User.findById(user._id, 'following')
       .populate('following', ['_id'])
@@ -53,7 +54,7 @@ exports.find = async (req, res) => {
 
 exports.findInfinite = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
 
     const following = await User.findById(user._id, 'following')
       .populate('following', ['_id'])
@@ -89,7 +90,7 @@ exports.getFollowers = async (req, res) => {
   if(req.params.type === 'Followers') {
 
     try {
-      const user = authService.verifyToken(req);
+      const { user, token } = await authService.verifyToken(req);
       const followers = await User.findById(user._id, 'followers')
         .populate('followers', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
         // .limit(20)
@@ -130,7 +131,7 @@ exports.getFollowers = async (req, res) => {
   }
 
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let following = await User.findById(user._id, 'following')
       .populate('following', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .lean()
@@ -140,6 +141,7 @@ exports.getFollowers = async (req, res) => {
           _id: user._id,
           firstName: user.firstName ? user.firstName : '',
           lastName: user.lastName ? user.lastName :'',
+          fullName: user.fullName ? user.fullName: '',
           photo: user.photo ? user.photo : false,
           following: true
         };
@@ -157,7 +159,7 @@ exports.getFollowers = async (req, res) => {
 
 exports.followUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const foundUser = await User.findById(user._id);
     foundUser.following.push(req.body.id);
 
@@ -194,7 +196,7 @@ exports.followUser = async (req, res) => {
 
 exports.unfollowUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     const updatedUser = foundUser.following.filter(user => user._id.toString() !== req.body.id);
     foundUser.following = updatedUser;
@@ -220,7 +222,7 @@ exports.unfollowUser = async (req, res) => {
 
 exports.myProfile = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const myProfile = await User.findById(user._id, ['_id,', 'firstName', 'lastName', 'fullName', 'photo']);
     res.status(200).json(myProfile);
   }
@@ -234,7 +236,7 @@ exports.myProfile = async (req, res) => {
 
 exports.uploadProfilePhoto = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const foundUser = await User.findById(user._id);
     foundUser.photo = req.body.photo;
     await foundUser.save();
@@ -249,7 +251,7 @@ exports.uploadProfilePhoto = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const userProfile = await User.findById(req.params.id, ['_id', 'firstName', 'lastName', 'fullName', 'photo']);
     const userTodos = await Todo.find({ user: req.params.id })
       .where('finished').equals(false)
@@ -261,13 +263,13 @@ exports.getProfile = async (req, res) => {
   catch(e) {
     authService.handleError(e, res);
   }
-}
+};
 
 //Search Users By Name /////////////////////////////////////////////////
 
 exports.searchUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const users = await User.find({ fullName : { '$regex' : req.params.name, '$options' : 'i' } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .limit(20)
     .exec();
@@ -288,7 +290,7 @@ exports.searchUser = async (req, res) => {
 
 exports.getUserTodoHistory = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const history = await Todo.find({ user: req.params.id })
       .where('finisehd').equals(true)
       .sort({ date: 'desc' })
@@ -301,13 +303,13 @@ exports.getUserTodoHistory = async (req, res) => {
   catch(e) {
     authService.handleError(e, res);
   }  
-}
+};
 
 //Get User Todo List /////////////////////////////////////////////////////
 
 exports.getUserTodoList = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const history = await Todo.find({ user: req.params.id })
       .where('finisehd').equals(false)
       .sort({ date: 'desc' })
@@ -320,4 +322,4 @@ exports.getUserTodoList = async (req, res) => {
   catch(e) {
     authService.handleError(e, res);
   }  
-}
+};

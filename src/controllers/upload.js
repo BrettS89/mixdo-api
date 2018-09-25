@@ -17,7 +17,7 @@ const s3 = new AWS.S3({
 
 exports.awsImage = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
 
     const key = `${user._id}/${uuid()}.${req.params.type}`
 

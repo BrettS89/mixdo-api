@@ -13,14 +13,14 @@ const notifications = require('../services/pushNotifications');
 
 exports.addTodo = async (req, res) => {
   try {
-  const user = authService.verifyToken(req);
+  const { user, token } = await authService.verifyToken(req);
 
   if(!req.body.description) {
     throw { error: 'Must provide a description', status: 406 }
   }
 
   const todo = new Todo({
-    createdDate: new Date(Date.now()),
+    createdDate: new Date(Date.now()).toString(),
     description: req.body.description,
     metaData: req.body.metaData,
     toSearch: `${req.body.description} ${req.body.metaData}`,
@@ -58,8 +58,8 @@ exports.addTodo = async (req, res) => {
 
 exports.finishTodo = async (req, res) => {
   try {
-    const user = await authService.verifyToken(req);
-    await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date() });
+    const { user, token } = await authService.verifyToken(req);
+    await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date(Date.now()).toString() });
     res.status(200).json({ finished: true });
 
     mixpanel.track('finished todo', user._id);
@@ -76,7 +76,7 @@ exports.finishTodo = async (req, res) => {
 
 exports.likeTodo = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const likedTodo = await Todo.findById(req.body.todo);
     if(likedTodo.likes.indexOf(user._id) > -1) {
       throw new Error('user already like this todo');
@@ -115,7 +115,7 @@ exports.likeTodo = async (req, res) => {
 
 exports.addUserTodo = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const newTodo = new Todo({
       description: req.body.description,
       metaData: req.body.metaData,
@@ -156,7 +156,8 @@ exports.addUserTodo = async (req, res) => {
 
 exports.getTodos = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
+    console.log(user);
     const friends = await User.findById(user._id, 'following');
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
@@ -181,7 +182,7 @@ exports.getTodos = async (req, res) => {
 
 exports.infinity = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const friends = await User.findById(user._id, 'following');
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
@@ -205,7 +206,8 @@ exports.infinity = async (req, res) => {
 
 exports.discover = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
+    console.log(user);
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .sort({ date: 'desc' })
@@ -219,7 +221,8 @@ exports.discover = async (req, res) => {
   }
 
   catch(e) {
-    authService.handleErrors(e, res);
+    console.log(e);
+    authService.handleError(e, res);
   }
 };
 
@@ -227,7 +230,7 @@ exports.discover = async (req, res) => {
 
 exports.infinityDiscover = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .where('date').lt(req.body.date)
@@ -252,7 +255,7 @@ exports.infinityDiscover = async (req, res) => {
 
 exports.getMyTodos = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const todos = await Todo.find({ user: user._id })
       .where('finished').equals(false)
       // .sort({ date: 'desc' })
@@ -287,7 +290,7 @@ exports.getMyTodos = async (req, res) => {
 
 exports.getMyTodoHistory = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const todos = await Todo.find({ user: user._id })
       .where('finished').equals(true)
       .sort({ date: 'desc' })
@@ -324,7 +327,7 @@ exports.getMyTodoHistory = async (req, res) => {
 exports.deleteTodo = async (req, res) => {
   console.log(req.body);
   try {
-    authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     await Todo.findByIdAndDelete(req.body.id);
     res.status(200).json({ deleted: true });
   }
@@ -338,7 +341,7 @@ exports.deleteTodo = async (req, res) => {
 
 exports.search = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const todos = await Todo.find({ toSearch : { '$regex' : req.params.data, '$options' : 'i' } })
     .sort({ date: 'desc' })
     .limit(20)
