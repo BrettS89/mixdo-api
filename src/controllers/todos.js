@@ -87,7 +87,7 @@ exports.likeTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_LIKED,
-      message: `${user.fullName} liked your todo: ${likedTodo.description}`,
+      message: `${user.fullName} liked your todo: "${likedTodo.description}"`,
       from: user._id,
       for: likedTodo.user
     });
@@ -207,7 +207,6 @@ exports.infinity = async (req, res) => {
 exports.discover = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
-    console.log(user);
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .sort({ date: 'desc' })
@@ -241,7 +240,7 @@ exports.infinityDiscover = async (req, res) => {
       .exec();
 
     const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
-    res.status(200).json(preppedTodos);
+    res.status(200).json({ res: preppedTodos, token });
 
     mixpanel.track('discover deep', user._id);
   }
@@ -278,7 +277,7 @@ exports.getMyTodos = async (req, res) => {
       };
     });  
 
-    res.status(200).json(preppedTodos);  
+    res.status(200).json({ res: preppedTodos, token });  
   }
 
   catch(e) {
@@ -313,7 +312,7 @@ exports.getMyTodoHistory = async (req, res) => {
     //   };
     // });  
 
-    res.status(200).json(todos);  
+    res.status(200).json({ res: todos, token });  
   }
 
   catch(e) {
@@ -329,7 +328,7 @@ exports.deleteTodo = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     await Todo.findByIdAndDelete(req.body.id);
-    res.status(200).json({ deleted: true });
+    res.status(200).json({ res: { deleted: true }, token });
   }
 
   catch(e) {
@@ -342,13 +341,17 @@ exports.deleteTodo = async (req, res) => {
 exports.search = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
+    const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find({ toSearch : { '$regex' : req.params.data, '$options' : 'i' } })
     .sort({ date: 'desc' })
     .limit(20)
     .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .lean()
     .exec();
-    res.status(200).json(todos);
+    
+    const preppedTodos = todoService.getPreppedTodos(user._id, todos, following, user._id, true);
+
+    res.status(200).json({ res: preppedTodos, token });
 
     mixpanel.track('todo search', user._id);
   }

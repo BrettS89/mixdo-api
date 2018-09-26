@@ -30,7 +30,7 @@ exports.awsImage = async (req, res) => {
       if(err) {
         return res.status(500).json({ error: 'an error occured' });
       }
-      res.status(200).json({ key, url });
+      res.status(200).json({ res: { key, url }, token });
     });
   }
 
