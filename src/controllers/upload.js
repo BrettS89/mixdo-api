@@ -17,7 +17,7 @@ const s3 = new AWS.S3({
 
 exports.awsImage = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
 
     const key = `${user._id}/${uuid()}.${req.params.type}`
 
@@ -30,7 +30,7 @@ exports.awsImage = async (req, res) => {
       if(err) {
         return res.status(500).json({ error: 'an error occured' });
       }
-      res.status(200).json({ key, url });
+      res.status(200).json({ res: { key, url }, token });
     });
   }
 

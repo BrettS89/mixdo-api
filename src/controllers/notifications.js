@@ -4,15 +4,13 @@ const Notification = require('../models/notification');
 
 exports.get = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
-    console.log(user);
+    const { user, token } = await authService.verifyToken(req);
     const notifications = await Notification.find({ for: user._id })
       .sort({ date: 'desc' })
       .limit(10)
       .populate('from', ['_id', 'photo'])
       .exec();
-      console.log(notifications);
-      res.status(200).json(notifications);
+      res.status(200).json({ res: notifications, token });
   }
 
   catch(e) {

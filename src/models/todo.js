@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const todoSchema = new mongoose.Schema({
-  createdDate: { type: Date },
+  createdDate: { type: String },
   date: { type: Number },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: { type: String, required: true },
