@@ -119,7 +119,7 @@ exports.addUserTodo = async (req, res) => {
     const newTodo = new Todo({
       description: req.body.description,
       metaData: req.body.metaData,
-      createdDate: new Date(Date.now()),
+      createdDate: new Date(Date.now()).toString(),
       date: Date.now(),
       user: user._id
     });
