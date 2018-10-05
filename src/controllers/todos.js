@@ -99,7 +99,8 @@ exports.likeTodo = async (req, res) => {
     const foundUser = await User.findById(likedTodo.user);
 
     if(foundUser.pushToken) {
-      await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
+      const token = await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
+      console.log(token);
     }
 
     mixpanel.track('todo liked', user._id);
@@ -143,7 +144,8 @@ exports.addUserTodo = async (req, res) => {
     const foundUser = await User.findById(addedTodo.user);
 
     if(foundUser.pushToken) {
-      await notifications.send(foundUser.pushToken, `${user.fullName} added your todo`);
+      const token = await notifications.send(foundUser.pushToken, `${user.fullName} added your todo`);
+      console.log(token);
     }
   }
 
