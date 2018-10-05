@@ -25,12 +25,12 @@ exports.awsImage = async (req, res) => {
       Bucket: keys.bucket,
       ContentType: `image/${req.params.type}`,
       ContentEncoding: 'base64',
-      Key: `https://s3.amazonaws.com/mixdodev/${key}`
+      Key: key
     }, (err, url) => {
       if(err) {
         return res.status(500).json({ error: 'an error occured' });
       }
-      res.status(200).json({ res: { key, url }, token });
+      res.status(200).json({ res: { key, url, bucket: keys.bucket }, token });
     });
   }
 
