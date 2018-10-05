@@ -23,7 +23,7 @@ exports.awsImage = async (req, res) => {
 
     s3.getSignedUrl('putObject', {
       Bucket: keys.bucket,
-      ContentType: `image/${req.params.type}`,
+      ContentType: `https://s3.amazonaws.com/${keys.bucket}/image/${req.params.type}`,
       ContentEncoding: 'base64',
       Key: key
     }, (err, url) => {
