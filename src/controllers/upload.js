@@ -23,9 +23,9 @@ exports.awsImage = async (req, res) => {
 
     s3.getSignedUrl('putObject', {
       Bucket: keys.bucket,
-      ContentType: `https://s3.amazonaws.com/${keys.bucket}/image/${req.params.type}`,
+      ContentType: `image/${req.params.type}`,
       ContentEncoding: 'base64',
-      Key: key
+      Key: `https://s3.amazonaws.com/mixdodev/${key}`
     }, (err, url) => {
       if(err) {
         return res.status(500).json({ error: 'an error occured' });
