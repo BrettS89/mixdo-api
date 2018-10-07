@@ -132,7 +132,7 @@ exports.addUserTodo = async (req, res) => {
     const notification = new Notification({
       date: Date.now(),
       type: notificationTypes.TODO_ADDED,
-      message: `${user.fullName} added your todo: ${addedTodo.description}`,
+      message: `${user.fullName} added your todo: "${addedTodo.description}"`,
       from: user._id,
       for: addedTodo.user
     });
