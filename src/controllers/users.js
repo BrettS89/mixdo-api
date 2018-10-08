@@ -159,8 +159,12 @@ exports.followUser = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     const foundUser = await User.findById(user._id);
-    foundUser.following.push(req.body.id);
 
+    if(foundUser.following.indexOf(req.body.id) !== -1) {
+      return res.status(200).json({ res: { status: 'alreadyFollowing' }, token });
+    }
+
+    foundUser.following.push(req.body.id);
     const followedUser = await User.findById(req.body.id);
     followedUser.followers.push(foundUser._id);
 
