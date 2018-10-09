@@ -24,4 +24,6 @@ router.get('/search/:name', users.searchUser);
 
 router.post('/profilephoto', users.uploadProfilePhoto);
 
+router.delete('/delete', users.deleteUser);
+
 module.exports = router;
