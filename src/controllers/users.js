@@ -295,7 +295,7 @@ exports.deleteUser = async (req, res) => {
     foundUser.firstName = 'Deleted';
     foundUser.lastName = 'user';
     foundUser.photo = '';
-    foundUser.email = '';
+    foundUser.email = `deleted:${user._id}`;
     foundUser.devices = [];
     await foundUser.save();
     
