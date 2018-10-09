@@ -290,7 +290,15 @@ exports.deleteUser = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     await Todo.remove({ user: user._id });
-    await User.findByIdAndRemove(user._id);
+    let foundUser = await User.findById(user._id);
+    foundUser.fullName = 'Deleted user';
+    foundUser.firstName = 'Deleted';
+    foundUser.lastName = 'user';
+    foundUser.photo = '';
+    foundUser.email = '';
+    foundUser.devices = [];
+    await foundUser.save();
+    
     res.status(200).json({ res: { status: true }, token });
   }
 
