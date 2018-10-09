@@ -284,6 +284,21 @@ exports.searchUser = async (req, res) => {
 };
 
 
+//Delete a user and posts ///////////////////////////////////////////////
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    await Todo.remove({ user: user._id });
+    await User.findByIdAndRemove(user._id);
+    res.status(200).json({ res: { status: true }, token });
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+}
+
 
 //MAYBE ADD THIS LATER//////////////////////////////////////////////////////////////////////
 
