@@ -28,4 +28,6 @@ router.post('/infinitidiscover', todos.infinityDiscover);
 
 router.get('/search/:data', todos.search);
 
+router.post('/flag', todos.flag);
+
 module.exports = router;
