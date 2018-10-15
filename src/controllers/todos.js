@@ -362,3 +362,19 @@ exports.search = async (req, res) => {
     authService.handleError(e, res);
   }
 };
+
+// Flag a todo ////////////////////////////////////////////////////
+
+exports.flag = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    let todo = await Todo.findById(req.body.id);
+    todo.flagged = true;
+    await todo.save();
+    res.status(200).json({ res: { status: 'flagged' }, token });
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+}
