@@ -187,7 +187,7 @@ exports.infinity = async (req, res) => {
     const friends = await User.findById(user._id, 'following');
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
-      .where('date').lt(req.body.date).and('flagged').ne(true);
+      .where('date').lt(req.body.date).and('flagged').ne(true)
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
