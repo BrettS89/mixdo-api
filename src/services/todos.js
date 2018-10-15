@@ -15,7 +15,8 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
           likes: todo.likes,
           liked: true,
           added: todo.added,
-          comments: todo.comments
+          comments: todo.comments,
+          flagged: todo.flagged,
         };
       }  
     };
@@ -39,7 +40,8 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
             liked: todo.liked,
             added: todo.added,
             didAdd: true,
-            comments: todo.comments
+            comments: todo.comments,
+            flagged: todo.flagged,
           };
         }  
       };
