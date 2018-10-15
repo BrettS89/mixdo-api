@@ -199,6 +199,7 @@ exports.infinity = async (req, res) => {
   }
 
   catch(e) {
+    console.log(e);
     authService.handleError(e, res);
   }
 };
