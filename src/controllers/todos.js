@@ -187,7 +187,7 @@ exports.infinity = async (req, res) => {
     const friends = await User.findById(user._id, 'following');
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
-      .where('date').lt(req.body.date)
+      .where('date').lt(req.body.date).and('flagged').ne(true)
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
@@ -210,6 +210,7 @@ exports.discover = async (req, res) => {
     const { user, token } = await authService.verifyToken(req);
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
+      .where('flagged').ne(true)
       .sort({ date: 'desc' })
       .limit(20)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
@@ -233,7 +234,7 @@ exports.infinityDiscover = async (req, res) => {
     const { user, token } = await authService.verifyToken(req);
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
-      .where('date').lt(req.body.date)
+      .where('date').lt(req.body.date).and('flagged').ne(true)
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
