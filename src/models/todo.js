@@ -11,7 +11,8 @@ const todoSchema = new mongoose.Schema({
   finished: { type: Boolean, default: false },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  flagged: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model('Todo', todoSchema);
