@@ -23,7 +23,11 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
     return todo;
   });
 
-  const todosWithAdds = preppedTodos.map(todo => {
+  const flaggedFiltered = preppedTodos.filter(todo => {
+    return todo.flagged !== true;
+  });
+
+  const todosWithAdds = flaggedFiltered.map(todo => {
       for(let i = 0; i < todo.added.length; i++) {
         if(todo.added[i].toString() === userId.toString()) {
           
