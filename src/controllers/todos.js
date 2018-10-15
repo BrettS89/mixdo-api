@@ -159,11 +159,10 @@ exports.addUserTodo = async (req, res) => {
 exports.getTodos = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
-    console.log(user);
     const friends = await User.findById(user._id, 'following');
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
-      // .where('finished').equals(false)
+      .where('flagged').ne(true)
       .sort({ date: 'desc' })
       .limit(20)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
