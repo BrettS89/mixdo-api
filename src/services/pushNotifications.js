@@ -2,8 +2,6 @@ const { Expo } = require('expo-server-sdk');
 const expo = new Expo();
 
 exports.send = async (pushToken, message) => {
-  console.log(pushToken);
-
   const notification = {
     to: pushToken,
     sound: 'default',
@@ -12,8 +10,7 @@ exports.send = async (pushToken, message) => {
   };
 
   try {
-    const res = await expo.sendPushNotificationsAsync(notification);
-    console.log(res);
+    await expo.sendPushNotificationsAsync(notification);
   }
   catch(e) {
     console.log(e);

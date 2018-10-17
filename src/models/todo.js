@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const todoSchema = new mongoose.Schema({
-  createdDate: { type: Date },
+  createdDate: { type: String },
   date: { type: Number },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: { type: String, required: true },
@@ -11,7 +11,8 @@ const todoSchema = new mongoose.Schema({
   finished: { type: Boolean, default: false },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  flagged: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model('Todo', todoSchema);

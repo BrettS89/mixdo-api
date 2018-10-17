@@ -8,20 +8,26 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
           date: todo.date,
           createdDate: todo.createdDate,
           user: todo.user,
+          image: todo.image,
           description: todo.description,
           metaData: todo.metaData,
           finished: todo.finished,
           likes: todo.likes,
           liked: true,
           added: todo.added,
-          comments: todo.comments
+          comments: todo.comments,
+          flagged: todo.flagged,
         };
       }  
     };
     return todo;
   });
 
-  const todosWithAdds = preppedTodos.map(todo => {
+  const flaggedFiltered = preppedTodos.filter(todo => {
+    return todo.flagged !== true;
+  });
+
+  const todosWithAdds = flaggedFiltered.map(todo => {
       for(let i = 0; i < todo.added.length; i++) {
         if(todo.added[i].toString() === userId.toString()) {
           
@@ -33,11 +39,13 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
             description: todo.description,
             metaData: todo.metaData,
             finished: todo.finished,
+            image: todo.image,
             likes: todo.likes,
             liked: todo.liked,
             added: todo.added,
             didAdd: true,
-            comments: todo.comments
+            comments: todo.comments,
+            flagged: todo.flagged,
           };
         }  
       };
@@ -45,6 +53,7 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
   });
 
   if(discover) {
+    console.log(todosWithAdds);
     const todosWithFollowing = todosWithAdds.map(todo => {
       following.push(myId);
       for(let user of following) {

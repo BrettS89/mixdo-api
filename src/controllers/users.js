@@ -1,5 +1,3 @@
-const Mixpanel = require('mixpanel');
-const key = require('../config').mixpanelToken;
 const authService = require('../services/auth');
 const Todo = require('../models/todo');
 const User = require('../models/user');
@@ -11,11 +9,11 @@ const notifications = require('../services/pushNotifications');
 //Save pushToken
 exports.savePushToken = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
     await foundUser.save();
-    res.status(200).json({ succes: true });
+    res.status(200).json({ res: { succes: true }, token });
   }
 
   catch(e) {
@@ -28,7 +26,8 @@ exports.savePushToken = async (req, res) => {
 
 exports.find = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
+    console.log('hi', user);
 
     const following = await User.findById(user._id, 'following')
       .populate('following', ['_id'])
@@ -41,7 +40,7 @@ exports.find = async (req, res) => {
       .lean()
       .exec();
 
-    res.status(200).json({ users, following });
+    res.status(200).json({ res: { users, following }, token });
   }
 
   catch(e) {
@@ -53,7 +52,7 @@ exports.find = async (req, res) => {
 
 exports.findInfinite = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
 
     const following = await User.findById(user._id, 'following')
       .populate('following', ['_id'])
@@ -73,7 +72,7 @@ exports.findInfinite = async (req, res) => {
 
     console.log(filteredUsers);
 
-    res.status(200).json(filteredUsers);
+    res.status(200).json({ res: filteredUsers, token });
   }
 
   catch(e) {
@@ -89,7 +88,7 @@ exports.getFollowers = async (req, res) => {
   if(req.params.type === 'Followers') {
 
     try {
-      const user = authService.verifyToken(req);
+      const { user, token } = await authService.verifyToken(req);
       const followers = await User.findById(user._id, 'followers')
         .populate('followers', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
         // .limit(20)
@@ -117,20 +116,20 @@ exports.getFollowers = async (req, res) => {
             return follower;
           });
   
-        return res.status(200).json({followers1});  
+        return res.status(200).json({ followers1, token });  
       }  
       catch(e) {
         const followers1 = followers.followers;
-        res.status(200).json({followers1});
+        return res.status(200).json({ followers1, token });
       }    
     }
     catch(e) {
-      res.status(200).json({ users: 'no users' });
+      return res.status(200).json({ users: 'no users', token });
     }
   }
 
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let following = await User.findById(user._id, 'following')
       .populate('following', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .lean()
@@ -140,15 +139,16 @@ exports.getFollowers = async (req, res) => {
           _id: user._id,
           firstName: user.firstName ? user.firstName : '',
           lastName: user.lastName ? user.lastName :'',
+          fullName: user.fullName ? user.fullName: '',
           photo: user.photo ? user.photo : false,
           following: true
         };
       });
-      res.status(200).json({followers1});
+      res.status(200).json({ followers1, token });
   }
 
   catch(e) {
-    res.status(200).json({ users: 'no users' });
+    res.status(200).json({ users: 'no users', token });
   }
 
 };
@@ -157,17 +157,21 @@ exports.getFollowers = async (req, res) => {
 
 exports.followUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const foundUser = await User.findById(user._id);
-    foundUser.following.push(req.body.id);
 
+    if(foundUser.following.indexOf(req.body.id) !== -1) {
+      return res.status(200).json({ res: { status: 'alreadyFollowing' }, token });
+    }
+
+    foundUser.following.push(req.body.id);
     const followedUser = await User.findById(req.body.id);
     followedUser.followers.push(foundUser._id);
 
     const notification = new Notification({
       date: Date.now(),
       type: FOLLOWED,
-      message: `${foundUser.firstName} ${foundUser.lastName} started following you`,
+      message: `${foundUser.fullName} started following you`,
       from: foundUser._id,
       for: req.body.id
     });
@@ -176,7 +180,7 @@ exports.followUser = async (req, res) => {
     await followedUser.save();
     await notification.save();
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ res: { success: true }, token });
 
     if(followedUser.pushToken) {
       console.log('in');
@@ -194,7 +198,7 @@ exports.followUser = async (req, res) => {
 
 exports.unfollowUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     const updatedUser = foundUser.following.filter(user => user._id.toString() !== req.body.id);
     foundUser.following = updatedUser;
@@ -207,7 +211,7 @@ exports.unfollowUser = async (req, res) => {
 
     await unfollowedUser.save()
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ res: { success: true }, token });
   }
 
   catch(e) {
@@ -220,9 +224,9 @@ exports.unfollowUser = async (req, res) => {
 
 exports.myProfile = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const myProfile = await User.findById(user._id, ['_id,', 'firstName', 'lastName', 'fullName', 'photo']);
-    res.status(200).json(myProfile);
+    res.status(200).json({ res: myProfile, token });
   }
 
   catch(e) {
@@ -234,7 +238,7 @@ exports.myProfile = async (req, res) => {
 
 exports.uploadProfilePhoto = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const foundUser = await User.findById(user._id);
     foundUser.photo = req.body.photo;
     await foundUser.save();
@@ -249,29 +253,29 @@ exports.uploadProfilePhoto = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const userProfile = await User.findById(req.params.id, ['_id', 'firstName', 'lastName', 'fullName', 'photo']);
     const userTodos = await Todo.find({ user: req.params.id })
       .where('finished').equals(false)
       .exec();
     
-    res.status(200).json({ user: userProfile, todos: userTodos });
+    res.status(200).json({ user: userProfile, todos: userTodos, token });
   }
 
   catch(e) {
     authService.handleError(e, res);
   }
-}
+};
 
 //Search Users By Name /////////////////////////////////////////////////
 
 exports.searchUser = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const users = await User.find({ fullName : { '$regex' : req.params.name, '$options' : 'i' } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .limit(20)
     .exec();
-    res.status(200).json(users);
+    res.status(200).json({ res: users, token });
   }
 
   catch(e) {
@@ -280,6 +284,29 @@ exports.searchUser = async (req, res) => {
 };
 
 
+//Delete a user and posts ///////////////////////////////////////////////
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    await Todo.remove({ user: user._id });
+    let foundUser = await User.findById(user._id);
+    foundUser.fullName = 'Deleted user';
+    foundUser.firstName = 'Deleted';
+    foundUser.lastName = 'user';
+    foundUser.photo = '';
+    foundUser.email = `deleted:${user._id}`;
+    foundUser.devices = [];
+    await foundUser.save();
+    
+    res.status(200).json({ res: { status: true }, token });
+  }
+
+  catch(e) {
+    console.log(e);
+    authService.handleError(e, res);
+  }
+}
 
 
 //MAYBE ADD THIS LATER//////////////////////////////////////////////////////////////////////
@@ -288,7 +315,7 @@ exports.searchUser = async (req, res) => {
 
 exports.getUserTodoHistory = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const history = await Todo.find({ user: req.params.id })
       .where('finisehd').equals(true)
       .sort({ date: 'desc' })
@@ -301,13 +328,13 @@ exports.getUserTodoHistory = async (req, res) => {
   catch(e) {
     authService.handleError(e, res);
   }  
-}
+};
 
 //Get User Todo List /////////////////////////////////////////////////////
 
 exports.getUserTodoList = async (req, res) => {
   try {
-    const user = authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     const history = await Todo.find({ user: req.params.id })
       .where('finisehd').equals(false)
       .sort({ date: 'desc' })
@@ -320,4 +347,4 @@ exports.getUserTodoList = async (req, res) => {
   catch(e) {
     authService.handleError(e, res);
   }  
-}
+};
