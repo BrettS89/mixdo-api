@@ -6,6 +6,7 @@ const jwtSecret = require('../config').jwtSecret;
 const mixpanel = require('../services/mixpanel');
 
 exports.signUp = async (req, res) => {
+  console.log('hi');
   const { email, password, firstName, lastName, deviceName } = req.body;
   try {
     if(!email || !password) {
@@ -13,7 +14,7 @@ exports.signUp = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-
+    console.log('first');
     if(user) {
       return res.status(422).json({ error: 'Email is in use' });
     }
