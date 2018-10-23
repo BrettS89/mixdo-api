@@ -109,6 +109,7 @@ exports.getFollowers = async (req, res) => {
                 _id: follower._id,
                 firstName: follower.firstName ? follower.firstName : '',
                 lastName: follower.lastName ? follower.lastName :'',
+                fullName: follower.fullName ? follower.fullName : '',
                 photo: follower.photo ? follower.photo : false,
                 following: true
               };
