@@ -238,7 +238,7 @@ exports.infinityDiscover = async (req, res) => {
       .where('date').lt(req.body.date)
       .sort({ date: 'desc' })
       .limit(10)
-      .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('user', ['_id', 'firstName', 'fullName', 'lastName', 'photo'])
       .lean()
       .exec();
 
