@@ -8,11 +8,13 @@ const notifications = require('../services/pushNotifications');
 
 //Save pushToken
 exports.savePushToken = async (req, res) => {
+  console.log('in');
   try {
     const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
     await foundUser.save();
+    console.log('in2');
     res.status(200).json({ res: { succes: true }, token });
   }
 

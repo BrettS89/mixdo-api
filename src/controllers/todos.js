@@ -327,7 +327,6 @@ exports.getMyTodoHistory = async (req, res) => {
 // Delete Item  ///////////////////////////////////////////////////
 
 exports.deleteTodo = async (req, res) => {
-  console.log(req.body);
   try {
     const { user, token } = await authService.verifyToken(req);
     await Todo.findByIdAndDelete(req.body.id);
