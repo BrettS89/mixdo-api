@@ -53,7 +53,6 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
   });
 
   if(discover) {
-    console.log(todosWithAdds);
     const todosWithFollowing = todosWithAdds.map(todo => {
       following.push(myId);
       for(let user of following) {
