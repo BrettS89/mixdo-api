@@ -4,6 +4,7 @@ const User = require('../models/user');
 const Notification = require('../models/notification');
 const FOLLOWED = require('../config/index').FOLLOWED;
 const notifications = require('../services/pushNotifications');
+const sendgrid = require('../services/sendgrid');
 
 
 //Save pushToken
@@ -184,6 +185,8 @@ exports.followUser = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ res: { success: true }, token });
+
+    sendgrid.sendMessage(followedUser.email, `${foundUser} started following you.`);
 
     if(followedUser.pushToken) {
       console.log('in');
