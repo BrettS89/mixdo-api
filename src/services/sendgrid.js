@@ -6,7 +6,7 @@ sgMail.setApiKey(key);
 exports.sendMessage = (user, subject) => {
   const msg = {
     to: user,
-    from: 'brett@mixdo.io',
+    from: 'Mixdo <brett@mixdo.io>',
     subject,
     text: 'hi there',
     html: '<strong>ayooo</strong>',
