@@ -186,7 +186,7 @@ exports.followUser = async (req, res) => {
 
     res.status(200).json({ res: { success: true }, token });
 
-    sendgrid.sendMessage(followedUser.email, `${foundUser} started following you.`);
+    sendgrid.sendMessage(followedUser.email, `${foundUser.fullName} started following you.`);
 
     if(followedUser.pushToken) {
       console.log('in');
