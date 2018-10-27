@@ -7,6 +7,7 @@ const notificationTypes = require('../config/index');
 
 const mixpanel = require('../services/mixpanel');
 const notifications = require('../services/pushNotifications');
+const sendgrid = require('../services/sendgrid');
 
 
 // Add a todo /////////////////////////////////////////////////
