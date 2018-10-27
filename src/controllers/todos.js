@@ -103,7 +103,7 @@ exports.likeTodo = async (req, res) => {
       const token = await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
       console.log(token);
     }
-    sendgrid.sendMessage(foundUser.email, `${user.fullName} liked your todo ${likedTodo.description}.`);
+    sendgrid.sendMessage(foundUser.email, `${user.fullName} liked your todo`, `${user.fullName} liked your todo ${likedTodo.description}.`);
 
     mixpanel.track('todo liked', user._id);
   }
@@ -150,7 +150,7 @@ exports.addUserTodo = async (req, res) => {
       console.log(token);
     }
 
-    sendgrid.sendMessage(foundUser.email, `${user.fullName} added your todo ${addedTodo.description}.`);
+    sendgrid.sendMessage(foundUser.email, `${user.fullName} added your todo.`, `${user.fullName} added your todo ${addedTodo.description}.`);
   }
 
   catch(e) {
