@@ -4,7 +4,6 @@ const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
 const notificationTypes = require('../config/index');
-
 const mixpanel = require('../services/mixpanel');
 const notifications = require('../services/pushNotifications');
 const sendgrid = require('../services/sendgrid');
