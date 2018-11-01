@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
   res.send('Welcome to the mixdo api');
 });
 
-router.get('/connection', (req, res) => {
+router.get('/connection', async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     res.status(200).json({ res: 'in', _id: user._id });
