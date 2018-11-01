@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 router.get('/connection', (req, res) => {
   try {
     const user = authService.verifyToken(req);
-    res.status(200).json({ res: 'in', eyeDee: user._id });
+    res.status(200).json({ res: user._id });
     mixpanel.track('login', user._id);
   }
   
