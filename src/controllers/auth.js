@@ -6,6 +6,7 @@ const jwtSecret = require('../config').jwtSecret;
 const mixpanel = require('../services/mixpanel');
 
 exports.signUp = async (req, res) => {
+  console.log('hi');
   const { email, password, firstName, lastName, deviceName } = req.body;
   try {
     if(!email || !password) {
@@ -13,7 +14,7 @@ exports.signUp = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-
+    console.log('first');
     if(user) {
       return res.status(422).json({ error: 'Email is in use' });
     }
@@ -39,7 +40,7 @@ exports.signUp = async (req, res) => {
     }
 
     const token = jwt.sign({ user: savedUser }, jwtSecret, { expiresIn: 1 });
-    res.status(200).json({ token });
+    res.status(200).json({ token, _id: savedUser._id });
 
     mixpanel.track('signup', savedUser._id);
   }
@@ -53,7 +54,6 @@ exports.signUp = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password, deviceName } = req.body;
-  console.log(deviceName);
   try {
     const user = await User.findOne({ email });
 
@@ -73,7 +73,7 @@ exports.login = async (req, res) => {
     };
 
 		const token = jwt.sign({ user: tokenUser }, jwtSecret, { expiresIn: 1 });
-    res.status(200).json({ token });
+    res.status(200).json({ token, _id: tokenUser._id });
     console.log(user)
     if(user.devices.indexOf(deviceName) === -1) {
       user.devices.push(deviceName);

@@ -8,4 +8,5 @@ module.exports = {
   bucket: process.env.BUCKET,
   mixpanelToken: process.env.MIXPANEL_TOKEN,
   mongoURI: process.env.MONGO_URI,
+  sendgridKey: process.env.SENDGRID_API_KEY,
 };

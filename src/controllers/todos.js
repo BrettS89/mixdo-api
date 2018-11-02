@@ -4,9 +4,9 @@ const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
 const notificationTypes = require('../config/index');
-
 const mixpanel = require('../services/mixpanel');
 const notifications = require('../services/pushNotifications');
+const sendgrid = require('../services/sendgrid');
 
 
 // Add a todo /////////////////////////////////////////////////
@@ -102,6 +102,7 @@ exports.likeTodo = async (req, res) => {
       const token = await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
       console.log(token);
     }
+    sendgrid.sendMessage(foundUser.email, `${user.fullName} liked your todo`, `${user.fullName} liked your todo ${likedTodo.description}.`);
 
     mixpanel.track('todo liked', user._id);
   }
@@ -147,6 +148,8 @@ exports.addUserTodo = async (req, res) => {
       const token = await notifications.send(foundUser.pushToken, `${user.fullName} added your todo`);
       console.log(token);
     }
+
+    sendgrid.sendMessage(foundUser.email, `${user.fullName} added your todo.`, `${user.fullName} added your todo ${addedTodo.description}.`);
   }
 
   catch(e) {
@@ -238,7 +241,7 @@ exports.infinityDiscover = async (req, res) => {
       .where('date').lt(req.body.date)
       .sort({ date: 'desc' })
       .limit(10)
-      .populate('user', ['_id', 'firstName', 'lastName', 'photo'])
+      .populate('user', ['_id', 'firstName', 'fullName', 'lastName', 'photo'])
       .lean()
       .exec();
 
@@ -327,7 +330,6 @@ exports.getMyTodoHistory = async (req, res) => {
 // Delete Item  ///////////////////////////////////////////////////
 
 exports.deleteTodo = async (req, res) => {
-  console.log(req.body);
   try {
     const { user, token } = await authService.verifyToken(req);
     await Todo.findByIdAndDelete(req.body.id);

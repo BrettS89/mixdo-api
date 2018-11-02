@@ -4,15 +4,18 @@ const User = require('../models/user');
 const Notification = require('../models/notification');
 const FOLLOWED = require('../config/index').FOLLOWED;
 const notifications = require('../services/pushNotifications');
+const sendgrid = require('../services/sendgrid');
 
 
 //Save pushToken
 exports.savePushToken = async (req, res) => {
+  console.log('in');
   try {
     const { user, token } = await authService.verifyToken(req);
     let foundUser = await User.findById(user._id);
     foundUser.pushToken = req.body.token;
     await foundUser.save();
+    console.log('in2');
     res.status(200).json({ res: { succes: true }, token });
   }
 
@@ -109,6 +112,7 @@ exports.getFollowers = async (req, res) => {
                 _id: follower._id,
                 firstName: follower.firstName ? follower.firstName : '',
                 lastName: follower.lastName ? follower.lastName :'',
+                fullName: follower.fullName ? follower.fullName : '',
                 photo: follower.photo ? follower.photo : false,
                 following: true
               };
@@ -181,6 +185,8 @@ exports.followUser = async (req, res) => {
     await notification.save();
 
     res.status(200).json({ res: { success: true }, token });
+
+    sendgrid.sendMessage(followedUser.email, `${foundUser.fullName} started following you.`);
 
     if(followedUser.pushToken) {
       console.log('in');
