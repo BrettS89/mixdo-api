@@ -65,7 +65,7 @@ exports.findInfinite = async (req, res) => {
     const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo', 'date'])
       .where('date').lt(Number(req.params.date))
       .sort({ date: 'desc' })
-      .limit(20)
+      .limit(30)
       .lean()
       .exec();
 
