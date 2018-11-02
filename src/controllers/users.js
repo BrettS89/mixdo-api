@@ -39,7 +39,7 @@ exports.find = async (req, res) => {
     const users = await User.find({ _id: { $nin: following.following } }, ['_id', 'firstName', 'lastName', 'fullName', 'photo', 'date'])
       .where('_id').ne(user._id)
       .sort({ date: 'desc' })
-      .limit(20)
+      .limit(30)
       .lean()
       .exec();
 
