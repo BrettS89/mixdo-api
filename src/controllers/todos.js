@@ -20,7 +20,7 @@ exports.addTodo = async (req, res) => {
   }
 
   const todo = new Todo({
-    createdDate: new Date(Date.now()).toString(),
+    createdDate: req.body.createdDate,
     description: req.body.description,
     metaData: req.body.metaData,
     toSearch: `${req.body.description} ${req.body.metaData}`,
@@ -59,7 +59,7 @@ exports.addTodo = async (req, res) => {
 exports.finishTodo = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
-    await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: new Date(Date.now()).toString() });
+    await Todo.findByIdAndUpdate(req.body.id, { finished: true, image: req.body.image, date: Date.now(), createdDate: req.body.createdDate });
     res.status(200).json({ res: { finished: true }, token });
 
     mixpanel.track('finished todo', user._id);
