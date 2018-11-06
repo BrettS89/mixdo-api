@@ -10,7 +10,7 @@ exports.verifyToken = async (req) => {
 
   try {
     await jwt.verify(receivedToken, keys.jwtSecret);
-  } 
+  }
   catch(e) {
     const error = (e.toString().split(' ')[2]);
 
