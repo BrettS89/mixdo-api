@@ -4,6 +4,8 @@ const keys = require('../config');
 exports.verifyToken = async (req) => {
   const receivedToken = req.header('authorization');
   const deviceName = req.header('deviceName');
+  console.log('token', receivedToken);
+  console.log('header', JSON.stringify(req.headers));
   if(!receivedToken) {
     throw { error: 'Unauthorized', status: 401 }; 
   }
