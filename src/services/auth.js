@@ -6,9 +6,9 @@ exports.verifyToken = async (req) => {
   const deviceName = req.header('deviceName');
   console.log('token', receivedToken);
   console.log('header', JSON.stringify(req.headers));
-  if(!receivedToken) {
-    throw { error: 'Unauthorized', status: 401 }; 
-  }
+  // if(!receivedToken) {
+  //   throw { error: 'Unauthorized', status: 401 }; 
+  // }
 
   try {
     await jwt.verify(receivedToken, keys.jwtSecret);
