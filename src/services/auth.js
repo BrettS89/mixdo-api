@@ -22,6 +22,7 @@ exports.verifyToken = async (req) => {
   }
 
   const decodedUser = jwt.decode(receivedToken);
+  console.log('decodedUser', decodedUser);
 
   if(decodedUser.user.devices.indexOf(deviceName) === -1) {
     throw { error: 'Unauthorized2', status: 401 };
