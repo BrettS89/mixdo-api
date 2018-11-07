@@ -110,11 +110,11 @@ exports.facebookAuth = async (req, res) => {
         devices: foundUser.devices,
       };
 
+      await foundUser.save();
       const token = jwt.sign({ user }, jwtSecret, { expiresIn: 1 });
       console.log('token', token);
       res.status(200).json({ token, status: 'login' });
 
-      await foundUser.save();
       return mixpanel.track('facebook login', user._id);
     }
 
@@ -131,7 +131,7 @@ exports.facebookAuth = async (req, res) => {
     });
 
     let savedUser = await newUser.save();
-
+    console.log(savedUser);
     const user = {
       fullName: savedUser.fullName,
       email: savedUser.email,
@@ -139,7 +139,7 @@ exports.facebookAuth = async (req, res) => {
       devices: savedUser.devices,
     };
 
-    const token = jwt.sign({ user: savedUser }, jwtSecret, { expiresIn: 1 });
+    const token = jwt.sign({ user }, jwtSecret, { expiresIn: 1 });
     res.status(200).json({ token, status: 'signup' });
 
     mixpanel.track('facebook signup', savedUser._id);
@@ -148,4 +148,4 @@ exports.facebookAuth = async (req, res) => {
   catch(e) {
     res.status(500).json('An error occured');
   }
-};  
+};
