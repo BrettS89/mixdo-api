@@ -111,6 +111,7 @@ exports.facebookAuth = async (req, res) => {
       };
 
       const token = jwt.sign({ user }, jwtSecret, { expiresIn: 1 });
+      console.log('token', token);
       res.status(200).json({ token, status: 'login' });
 
       await foundUser.save();
