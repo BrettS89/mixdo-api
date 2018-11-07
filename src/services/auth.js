@@ -6,9 +6,9 @@ exports.verifyToken = async (req) => {
   const deviceName = req.header('deviceName');
   console.log('token', receivedToken);
   console.log('header', JSON.stringify(req.headers));
-  // if(!receivedToken) {
-  //   throw { error: 'Unauthorized', status: 401 }; 
-  // }
+  if(!receivedToken) {
+    throw { error: 'Unauthorized1', status: 401 }; 
+  }
 
   try {
     await jwt.verify(receivedToken, keys.jwtSecret);
@@ -24,9 +24,9 @@ exports.verifyToken = async (req) => {
   const decodedUser = jwt.decode(receivedToken);
   console.log('decodedUser', decodedUser);
 
-  if(decodedUser.user.devices.indexOf(deviceName) === -1) {
-    throw { error: 'Unauthorized2', status: 401 };
-  }
+  // if(decodedUser.user.devices.indexOf(deviceName) === -1) {
+  //   throw { error: 'Unauthorized2', status: 401 };
+  // }
 
   if(decodedUser === null || !decodedUser.user.email) {
     throw { error: 'Unauthorized3', status: 401 };
