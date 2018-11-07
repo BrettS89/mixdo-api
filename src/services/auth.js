@@ -24,11 +24,11 @@ exports.verifyToken = async (req) => {
   const decodedUser = jwt.decode(receivedToken);
 
   if(decodedUser.user.devices.indexOf(deviceName) === -1) {
-    throw { error: 'Unauthorized', status: 401 };
+    throw { error: 'Unauthorized2', status: 401 };
   }
 
   if(decodedUser === null || !decodedUser.user.email) {
-    throw { error: 'Unauthorized', status: 401 };
+    throw { error: 'Unauthorized3', status: 401 };
   }
 
   const token = jwt.sign({ user: decodedUser.user }, keys.jwtSecret, { expiresIn: 1 });
