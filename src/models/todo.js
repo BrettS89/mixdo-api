@@ -11,6 +11,7 @@ const todoSchema = new mongoose.Schema({
   finished: { type: Boolean, default: false },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  commentCount: { type: Number, default: 0 },
   added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   flagged: { type: Boolean, default: false },
 });
