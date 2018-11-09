@@ -3,6 +3,7 @@ const todoService = require('../services/todos');
 const Todo = require('../models/todo');
 const User = require('../models/user');
 const Notification = require('../models/notification');
+const Comments = require('../models/comment');
 const notificationTypes = require('../config/index');
 const mixpanel = require('../services/mixpanel');
 const notifications = require('../services/pushNotifications');
@@ -99,8 +100,8 @@ exports.likeTodo = async (req, res) => {
     const foundUser = await User.findById(likedTodo.user);
 
     if(foundUser.pushToken) {
-      const token = await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
-      console.log(token);
+      const tok = await notifications.send(foundUser.pushToken, `${user.fullName} liked your todo`);
+      console.log('push', tok);
     }
     sendgrid.sendMessage(foundUser.email, `${user.fullName} liked your todo`, `${user.fullName} liked your todo ${likedTodo.description}.`);
 
@@ -145,8 +146,8 @@ exports.addUserTodo = async (req, res) => {
     const foundUser = await User.findById(addedTodo.user);
 
     if(foundUser.pushToken) {
-      const token = await notifications.send(foundUser.pushToken, `${user.fullName} added your todo`);
-      console.log(token);
+      const tok = await notifications.send(foundUser.pushToken, `${user.fullName} added your todo`);
+      console.log('push', tok);
     }
 
     sendgrid.sendMessage(foundUser.email, `${user.fullName} added your todo.`, `${user.fullName} added your todo ${addedTodo.description}.`);
@@ -375,6 +376,94 @@ exports.flag = async (req, res) => {
     todo.flagged = true;
     await todo.save();
     res.status(200).json({ res: { status: 'flagged' }, token });
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+}
+
+// Add a comment //////////////////////////////////////////////////
+
+exports.addComment = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    let todo = await Todo.findById(req.body.id);
+
+    todo.commentCount++;
+    await todo.save();
+
+    const comment = new Comments({
+      createdDate: new Date(Date.now()).toString(),
+      date: Number(Date.now()),
+      content: req.body.comment,
+      user: user._id,
+    });
+
+    const savedComment = await comment.save();
+
+    const notification = new Notification({
+      date: Date.now(),
+      type: notificationTypes.TODO_COMMENT,
+      message: `${user.fullName} commented on your todo: "${todo.description}"`,
+      from: user._id,
+      for: todo.user
+    });
+
+    await notification.save();
+
+    res.status(200).json({ res: { comment: savedComment }, token });
+
+    const foundUser = await User.findById(todo.user);
+
+    if(foundUser.pushToken) {
+      const tok = await notifications.send(foundUser.pushToken, `${user.fullName} commented on your todo`);
+      console.log('push', tok);
+    }
+    sendgrid.sendMessage(foundUser.email, `${user.fullName} commented on your todo`, `${user.fullName} commented on your todo ${todo.description}.`);
+
+    mixpanel.track('todo comment', user._id);
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+}
+
+// Get Comments /////////////////////////////////////////////////
+
+exports.getComments = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    const comments = await Comments.find({ todo: req.params.id })
+      .sort({ date: 'desc' })
+      .limit(30)
+      .populate('user', ['_id', 'fullName', 'photo'])
+      .lean()
+      .exec();
+
+      res.status(200).json({ res: { comments }, token });
+  }
+
+  catch(e) {
+    authService.handleError(e, res);
+  }
+}
+
+// Get Infinity Comments ///////////////////////////////////////
+
+exports.infinityComments = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    const comments = await Comments.find({ todo: req.body.id })
+      .where('date').lt(req.body.date)
+      .sort({ date: 'desc' })
+      .limit(30)
+      .populate('user', ['_id', 'fullName', 'photo'])
+      .lean()
+      .exec();
+
+      res.status(200).json({ res: { comments }, token });
   }
 
   catch(e) {

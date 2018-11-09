@@ -3,6 +3,7 @@ module.exports = {
   FOLLOWED: 'FOLLOWED',
   TODO_LIKED: 'TODO_LIKED',
   TODO_ADDED: 'TODO_ADDED',
+  TODO_COMMENT: 'TODO_COMMENT',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   bucket: process.env.BUCKET,
