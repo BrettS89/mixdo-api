@@ -442,7 +442,7 @@ exports.getComments = async (req, res) => {
       .lean()
       .exec();
 
-      res.status(200).json({ res: { comments }, token });
+      res.status(200).json({ res: { comments, todo: req.params.id }, token });
   }
 
   catch(e) {
@@ -463,7 +463,7 @@ exports.infinityComments = async (req, res) => {
       .lean()
       .exec();
 
-      res.status(200).json({ res: { comments }, token });
+      res.status(200).json({ res: { comments, todo: req.params.id }, token });
   }
 
   catch(e) {
