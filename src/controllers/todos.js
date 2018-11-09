@@ -400,7 +400,14 @@ exports.addComment = async (req, res) => {
       user: user._id,
     });
 
-    const savedComment = await comment.save();
+    let savedComment = await comment.save();
+    
+    const pulledUser = await User.findById(user._id);
+    savedComment.user = {
+      _id: pulledUser._id,
+      fullName: pulledUser.fullName,
+      photo: pulledUser.photo,
+    };
 
     const notification = new Notification({
       date: Date.now(),
