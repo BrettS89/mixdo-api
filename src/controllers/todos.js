@@ -401,7 +401,7 @@ exports.addComment = async (req, res) => {
     });
 
     let savedComment = await comment.save();
-    
+
     const pulledUser = await User.findById(user._id);
     savedComment.user = {
       _id: pulledUser._id,
@@ -418,7 +418,7 @@ exports.addComment = async (req, res) => {
     });
 
     await notification.save();
-
+    console.log(savedComment);
     res.status(200).json({ res: { comment: savedComment }, token });
 
     const foundUser = await User.findById(todo.user);
