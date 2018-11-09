@@ -396,7 +396,7 @@ exports.addComment = async (req, res) => {
     const comment = new Comments({
       createdDate: new Date(Date.now()).toString(),
       date: Number(Date.now()),
-      content: req.body.comment,
+      content: req.body.content,
       user: user._id,
     });
 
