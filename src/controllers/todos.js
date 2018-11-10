@@ -450,7 +450,7 @@ exports.getComments = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     const comments = await Comments.find({ todo: req.params.id })
-      .sort({ date: 'desc' })
+      .sort({ date: 'asc' })
       .limit(30)
       .populate('user', ['_id', 'fullName', 'photo'])
       .lean()
