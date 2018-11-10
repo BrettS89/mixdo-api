@@ -4,8 +4,20 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
       if(todo.likes[i].toString() === userId.toString()) {
         
         return {
-          ...todo,
+          _id: todo._id,
+          date: todo.date,
+          createdDate: todo.createdDate,
+          user: todo.user,
+          image: todo.image,
+          description: todo.description,
+          commentCount: todo.commentCount,
+          metaData: todo.metaData,
+          finished: todo.finished,
+          likes: todo.likes,
           liked: true,
+          added: todo.added,
+          comments: todo.comments,
+          flagged: todo.flagged,
         };
       }  
     };
@@ -21,7 +33,20 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
         if(todo.added[i].toString() === userId.toString()) {
           
           return {
-            ...todo,
+            _id: todo._id,
+          date: todo.date,
+          createdDate: todo.createdDate,
+          user: todo.user,
+          image: todo.image,
+          description: todo.description,
+          commentCount: todo.commentCount,
+          metaData: todo.metaData,
+          finished: todo.finished,
+          likes: todo.likes,
+          liked: true,
+          added: todo.added,
+          comments: todo.comments,
+          flagged: todo.flagged,
             didAdd: true,
           };
         }
