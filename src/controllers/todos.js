@@ -394,19 +394,26 @@ exports.addComment = async (req, res) => {
     await todo.save();
 
     const comment = new Comments({
-      createdDate: new Date(Date.now()).toString(),
+      createdDate: req.body.date,
       date: Number(Date.now()),
       content: req.body.content,
+      todo: req.body.id,
       user: user._id,
     });
 
-    let savedComment = await comment.save();
+    const { _id, createdDate, date, content } = await comment.save();
+    const pullUser = await User.findById(user._id);
 
-    const pulledUser = await User.findById(user._id);
-    savedComment.user = {
-      _id: pulledUser._id,
-      fullName: pulledUser.fullName,
-      photo: pulledUser.photo,
+    const commentToSend = {
+      _id,
+      createdDate,
+      date,
+      content,
+      user: {
+        _id: pullUser._id,
+        fullName: pullUser.fullName,
+        photo: pullUser.photo,
+      }
     };
 
     const notification = new Notification({
@@ -418,8 +425,7 @@ exports.addComment = async (req, res) => {
     });
 
     await notification.save();
-    console.log(savedComment);
-    res.status(200).json({ res: { comment: savedComment }, token });
+    res.status(200).json({ res: { comment: commentToSend }, token });
 
     const foundUser = await User.findById(todo.user);
 
