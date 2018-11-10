@@ -43,7 +43,7 @@ exports.getPreppedTodos = (userId, todos, following, myId, discover) => {
           metaData: todo.metaData,
           finished: todo.finished,
           likes: todo.likes,
-          liked: true,
+          liked: todo.liked,
           added: todo.added,
           comments: todo.comments,
           flagged: todo.flagged,
