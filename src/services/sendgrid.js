@@ -12,7 +12,7 @@ exports.sendMessage = (user, subject, message) => {
     html: `<strong>${message} </strong>
     <br>
     <br>
-    Catch up with all of your actiity in mixdo!
+    Catch up with all of your activity in mixdo!
     `,
   };
   sgMail.send(msg);

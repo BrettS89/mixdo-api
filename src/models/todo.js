@@ -10,7 +10,7 @@ const todoSchema = new mongoose.Schema({
   toSearch: { type: String },
   finished: { type: Boolean, default: false },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   commentCount: { type: Number, default: 0 },
   added: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   flagged: { type: Boolean, default: false },
