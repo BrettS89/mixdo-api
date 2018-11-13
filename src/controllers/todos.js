@@ -78,7 +78,9 @@ exports.finishTodo = async (req, res) => {
 exports.likeTodo = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
-    const likedTodo = await Todo.findById(req.body.todo);
+    const likedTodo = await Todo.findById(req.body.todo)
+      .select('-comments')
+      .exec();
     if(likedTodo.likes.indexOf(user._id) > -1) {
       throw new Error('user already like this todo');
     }
@@ -127,7 +129,9 @@ exports.addUserTodo = async (req, res) => {
       user: user._id
     });
     await newTodo.save();
-    const addedTodo = await Todo.findById(req.body._id);
+    const addedTodo = await Todo.findById(req.body._id)
+      .select('-comments')
+      .exec();
     addedTodo.added.push(user._id);
     await addedTodo.save();
 
@@ -167,6 +171,7 @@ exports.getTodos = async (req, res) => {
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
       .where('flagged').ne(true)
+      .select('-comments')
       .sort({ date: 'desc' })
       .limit(20)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
@@ -192,10 +197,12 @@ exports.infinity = async (req, res) => {
     const friendsAndUser = [...friends.following, user._id];
     const todos = await Todo.find({ 'user': { $in: friendsAndUser }})
       .where('date').lt(req.body.date)
+      .select('-comments')
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
       .exec();
+
     const preppedTodos = todoService.getPreppedTodos(user._id, todos);
     res.status(200).json({ res: preppedTodos, token });
 
@@ -216,6 +223,7 @@ exports.discover = async (req, res) => {
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .where('flagged').ne(true)
+      .select('-comments')
       .sort({ date: 'desc' })
       .limit(20)
       .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
@@ -240,6 +248,7 @@ exports.infinityDiscover = async (req, res) => {
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find()
       .where('date').lt(req.body.date)
+      .select('-comments')
       .sort({ date: 'desc' })
       .limit(10)
       .populate('user', ['_id', 'firstName', 'fullName', 'lastName', 'photo'])
@@ -264,6 +273,7 @@ exports.getMyTodos = async (req, res) => {
     const { user, token } = await authService.verifyToken(req);
     const todos = await Todo.find({ user: user._id })
       .where('finished').equals(false)
+      .select('-comments')
       // .sort({ date: 'desc' })
       .lean()
       .exec(); 
@@ -299,6 +309,7 @@ exports.getMyTodoHistory = async (req, res) => {
     const { user, token } = await authService.verifyToken(req);
     const todos = await Todo.find({ user: user._id })
       .where('finished').equals(true)
+      .select('-comments')
       .sort({ date: 'desc' })
       .lean()
       .exec(); 
@@ -350,6 +361,7 @@ exports.search = async (req, res) => {
     const { following } = await User.findById(user._id, 'following');
     const todos = await Todo.find({ toSearch : { '$regex' : req.params.data, '$options' : 'i' } })
     .sort({ date: 'desc' })
+    .select('-comments')
     .limit(20)
     .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
     .lean()
@@ -389,9 +401,11 @@ exports.addComment = async (req, res) => {
   try {
     const { user, token } = await authService.verifyToken(req);
     let todo = await Todo.findById(req.body.id);
-
+    if(todo.comments.indexOf(user._id) === -1) {
+      todo.comments.push(user._id);
+    }
     todo.commentCount++;
-    await todo.save();
+    const savedTodo = await todo.save();
 
     const comment = new Comments({
       createdDate: req.body.date,
@@ -415,26 +429,50 @@ exports.addComment = async (req, res) => {
         photo: pullUser.photo,
       }
     };
-
-    const notification = new Notification({
-      date: Date.now(),
-      type: notificationTypes.TODO_COMMENT,
-      message: `${user.fullName} commented on your todo: "${todo.description}"`,
-      from: user._id,
-      for: todo.user
-    });
-
-    await notification.save();
+    
     res.status(200).json({ res: { comment: commentToSend }, token });
 
     const foundUser = await User.findById(todo.user);
+    if(user._id != foundUser._id) {
 
-    if(foundUser.pushToken) {
-      const tok = await notifications.send(foundUser.pushToken, `${user.fullName} commented on your todo`);
-      console.log('push', tok);
+      const notification = new Notification({
+        date: Date.now(),
+        type: notificationTypes.TODO_COMMENT,
+        message: `${user.fullName} commented on your todo: "${todo.description}"`,
+        from: user._id,
+        for: todo.user
+      });
+  
+      await notification.save();
+      if(foundUser.pushToken) {
+        const tok = await notifications.send(foundUser.pushToken, `${user.fullName} commented on your todo`);
+        console.log('push', tok);
+      }
+      sendgrid.sendMessage(foundUser.email, `${user.fullName} commented on your todo`, `${user.fullName} commented on your todo ${todo.description}.`);
     }
-    sendgrid.sendMessage(foundUser.email, `${user.fullName} commented on your todo`, `${user.fullName} commented on your todo ${todo.description}.`);
+    
+    const { comments } = await Todo.findById(savedTodo._id, 'comments')
+      .populate('comments', ['_id', 'email', 'pushToken'])
+      .exec()
 
+    const emails = [];
+    const pushTokens = [];
+
+    const filteredComments = comments.filter(person => {
+      return user._id != person._id && person._id != foundUser._id;
+    });
+    
+    filteredComments.forEach(user => {
+      emails.push(user.email);
+      if(user.pushToken) {
+        pushTokens.push(user.pushToken);
+      }
+    });
+    sendgrid.sendMessage(emails, `${user.fullName} commented on a todo you also commented on`, `${user.fullName} commented on a todo you also commented on: ${todo.description}.`);
+    if(pushTokens.length > 0) {
+      const tok = await notifications.sendBatch(pushTokens, `${user.fullName} commented on a todo you also commented on`);
+        console.log('push', tok);
+    }
     mixpanel.track('todo comment', user._id);
   }
 
