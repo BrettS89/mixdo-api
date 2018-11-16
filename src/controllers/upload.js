@@ -13,7 +13,7 @@ const s3 = new AWS.S3({
   secretAccessKey: keys.secretAccessKey,
 });
 
-// Add a todo /////////////////////////////////////////////////
+// Upload Image /////////////////////////////////////////////////
 
 exports.awsImage = async (req, res) => {
   try {
@@ -34,6 +34,25 @@ exports.awsImage = async (req, res) => {
     });
   }
 
+  catch(e) {
+    authService.handleError(e, res);
+  }
+};
+
+// Upload Image that won't crash iOS /////////////////////////////////////////////////
+
+exports.properImageUpload = async (req, res) => {
+  try {
+    const { user, token } = await authService.verifyToken(req);
+    const key = `${user._id}/${uuid()}.${req.params.type}`;
+    const response = {
+      fileName: key,
+      bucket: keys.bucket,
+      accessKey: keys.accessKeyId,
+      secretKey: keys.secretAccessKey,
+    };
+    res.status(200).json({ res: { awsData: response }, token });
+  }
   catch(e) {
     authService.handleError(e, res);
   }
