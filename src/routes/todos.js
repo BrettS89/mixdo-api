@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const todos = require('../controllers/todos');
 
+router.get('/public', todos.publicTodos);
+
 router.post('/add', todos.addTodo);
 
 router.post('/finish', todos.finishTodo);

@@ -9,6 +9,28 @@ const mixpanel = require('../services/mixpanel');
 const notifications = require('../services/pushNotifications');
 const sendgrid = require('../services/sendgrid');
 
+// Get Public Todos //////////////////////////////////////////
+
+exports.publicTodos = async (req, res) => {
+  try {
+    const todos = await Todo.find()
+      .where('flagged').ne(true)
+      .select('-comments')
+      .sort({ date: 'desc' })
+      .limit(30)
+      .populate('user', ['_id', 'firstName', 'lastName', 'fullName', 'photo'])
+      .lean()
+      .exec();
+    
+    res.status(200).json({ todos });  
+  }
+
+  catch(e) {
+    console.log(e);
+    authService.handleError(e, res);
+  }
+};
+
 
 // Add a todo /////////////////////////////////////////////////
 
