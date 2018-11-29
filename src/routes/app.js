@@ -9,11 +9,20 @@ router.get('/', (req, res) => {
 
 router.get('/connection', async (req, res) => {
   try {
-    // const { user, token } = await authService.verifyToken(req);
+    const { user, token } = await authService.verifyToken(req);
     res.status(200).json({ res: 'in' });
-    // mixpanel.track('login', user._id);
+    mixpanel.track('login', user._id);
   }
   
+  catch(e) {
+    authService.handleError(e, res);
+  }
+});
+
+router.get('/connection2', async (req, res) => {
+  try {
+    res.status(200).json({ res: 'in' });
+  }
   catch(e) {
     authService.handleError(e, res);
   }
